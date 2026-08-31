@@ -6,9 +6,28 @@ import { DoseCalculatorWidget } from '@/components/DoseCalculatorWidget';
 
 export const revalidate = 60;
 
+const NON_COFFEE_KEYWORDS = [
+  'top', 'shirt', 't-shirt', 'tee', 'apparel', 'hat', 'cap', 'mug', 'cup',
+  'sweater', 'merch', 'filter paper', 'filters', 'pin', 'tote', 'hoodie',
+  'socks', 'tumbler', 'grinder', 'kettle', 'dripper', 'aeropress', 'v60',
+  'chemex', 'scale', 'gift card', 'poster', 'sticker', 'towel', 'clothing'
+];
+
+function isCoffeeProduct(product: { name: string; category?: string | null }) {
+  const nameLower = product.name.toLowerCase();
+  const categoryLower = (product.category || '').toLowerCase();
+
+  for (const kw of NON_COFFEE_KEYWORDS) {
+    // Check whole word or substring match for non-coffee items
+    if (new RegExp(`\\b${kw}\\b`, 'i').test(nameLower) || categoryLower.includes(kw)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 async function getHomepageData() {
   try {
-    const totalProducts = await prisma.product.count({ where: { isActive: true } });
     const totalRoasters = await prisma.roaster.count();
     const inStockCount = await prisma.variant.count({ where: { isAvailable: true } });
     const origins = await prisma.product.groupBy({
@@ -26,7 +45,7 @@ async function getHomepageData() {
           },
         },
       },
-      take: 24,
+      take: 60,
       include: {
         roaster: true,
         variants: { orderBy: { pricePer100g: 'asc' } },
@@ -35,15 +54,18 @@ async function getHomepageData() {
       orderBy: { id: 'asc' },
     });
 
+    // Strictly filter out non-coffee apparel/gear items
+    const coffeeOnlyFeatured = rawFeatured.filter(isCoffeeProduct);
+
     // Interleave across roasters for top diverse quality selection
-    const roasterMap = new Map<string, typeof rawFeatured>();
-    for (const p of rawFeatured) {
+    const roasterMap = new Map<string, typeof coffeeOnlyFeatured>();
+    for (const p of coffeeOnlyFeatured) {
       const rId = p.roaster.id;
       if (!roasterMap.has(rId)) roasterMap.set(rId, []);
       roasterMap.get(rId)!.push(p);
     }
 
-    const mixedFeatured: typeof rawFeatured = [];
+    const mixedFeatured: typeof coffeeOnlyFeatured = [];
     const queueList = Array.from(roasterMap.values());
     let maxLen = 0;
     for (const q of queueList) {
@@ -60,7 +82,7 @@ async function getHomepageData() {
 
     return {
       stats: {
-        totalProducts,
+        totalProducts: coffeeOnlyFeatured.length,
         totalRoasters,
         originsCount: origins.length,
         inStockCount,
