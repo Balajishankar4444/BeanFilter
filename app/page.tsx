@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, ShoppingBag, Truck, ExternalLink, Coffee, ArrowRight, ShieldCheck, Sparkles, Trophy, BadgePercent, MapPin, CheckCircle2, Star, HelpCircle } from 'lucide-react';
+import { Search, ShoppingBag, Truck, ExternalLink, Coffee, ArrowRight, ShieldCheck, Sparkles, Trophy, BadgePercent, MapPin, CheckCircle2, CupSoda, Calculator } from 'lucide-react';
 import { prisma } from '@/lib/db';
 import { ProductCard } from '@/components/ProductCard';
 import { DoseCalculatorWidget } from '@/components/DoseCalculatorWidget';
@@ -263,46 +263,50 @@ export default async function HomePage() {
           ))}
         </div>
 
-        {/* STAR BADGES & RATINGS EXPLANATION BOX */}
+        {/* COST PER CUP & CHEAPEST OVERALL DELIVERED OPTION EXPLANATION BOX */}
         <div className="rounded-3xl border border-amber-900/20 bg-gradient-to-br from-amber-50 via-white to-orange-50/40 p-6 shadow-sm space-y-4 mt-8">
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-900 text-amber-300 font-bold shadow">
-              <Star className="h-5 w-5 fill-amber-300" />
+              <Calculator className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-black text-stone-900">What Our ⭐ Star Badges & Ratings Mean</h3>
-              <p className="text-xs text-stone-500 font-semibold">How we rate value & quality across coffee listings</p>
+              <h3 className="text-base font-black text-stone-900">Understanding Our Value Calculations</h3>
+              <p className="text-xs text-stone-500 font-semibold">How Cost per Cup & Cheapest Overall Delivered Option work</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
-            <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
-              <div className="flex items-center gap-1 text-amber-900 font-black uppercase text-[10px] tracking-wider">
-                <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-                <span>⭐ Best Value Bag Size</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
+            {/* 1. Cost per Cup */}
+            <div className="rounded-2xl bg-white p-5 border border-stone-200 space-y-2 shadow-sm">
+              <div className="flex items-center gap-2 text-stone-900 font-black text-sm">
+                <CupSoda className="h-4 w-4 text-amber-800" />
+                <span>Cost per Cup</span>
               </div>
-              <p className="text-stone-700 leading-snug">
-                Marks the bag size (e.g. 500g or 1kg) offering the lowest price per 100g for that coffee, giving you maximum cup output per dollar.
+              <p className="text-stone-600 leading-relaxed">
+                Calculated dynamically based on your custom brew dose (e.g. 15g per cup):
+              </p>
+              <div className="rounded-xl bg-amber-50/80 p-2.5 text-[11px] font-mono text-amber-950 border border-amber-200/60">
+                (Bag Price ÷ Bag Weight in Grams) × Dose Grams = <strong>$0.71 / cup</strong>
+              </div>
+              <p className="text-[11px] text-emerald-700 font-extrabold">
+                Shows exact savings (~$5.29 per cup) compared to buying a $6 cafe coffee!
               </p>
             </div>
 
-            <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
-              <div className="flex items-center gap-1 text-emerald-800 font-black uppercase text-[10px] tracking-wider">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                <span>⭐ Top Specialty Micro-Lot</span>
+            {/* 2. Cheapest Overall Delivered Option */}
+            <div className="rounded-2xl bg-white p-5 border border-stone-200 space-y-2 shadow-sm">
+              <div className="flex items-center gap-2 text-stone-900 font-black text-sm">
+                <Truck className="h-4 w-4 text-amber-800" />
+                <span>Cheapest Overall Delivered Option</span>
               </div>
-              <p className="text-stone-700 leading-snug">
-                Identifies high-grade specialty micro-lots from renowned roasters (Onyx, Sey, Verve) featuring rare varieties, natural/anaerobic processes, and high cup scores.
+              <p className="text-stone-600 leading-relaxed">
+                Evaluates total delivered price (coffee price + exact shipping cost to your ZIP code):
               </p>
-            </div>
-
-            <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
-              <div className="flex items-center gap-1 text-amber-900 font-black uppercase text-[10px] tracking-wider">
-                <BadgePercent className="h-3.5 w-3.5 text-amber-700" />
-                <span>⭐ Cheapest Delivered Option</span>
+              <div className="rounded-xl bg-stone-50 p-2.5 text-[11px] font-mono text-stone-900 border border-stone-200">
+                Products Subtotal + Shipping Cost (or $0 if threshold met) = <strong>Cheapest Total</strong>
               </div>
-              <p className="text-stone-700 leading-snug">
-                Evaluates total delivered price (coffee price + shipping cost to your ZIP code) to ensure you get the absolute cheapest delivered combination.
+              <p className="text-[11px] text-amber-900 font-extrabold">
+                Combines free shipping thresholds and lowest price per 100g to minimize total checkout cost!
               </p>
             </div>
           </div>
