@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const flavorNotesParam = searchParams.get('flavorNotes');
   const maxPriceParam = searchParams.get('maxPrice');
   const maxPricePer100gParam = searchParams.get('maxPrice100g');
-  const inStockOnly = searchParams.get('inStockOnly') === 'true';
+  const showOutOfStock = searchParams.get('showOutOfStock') === 'true';
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '18', 10);
 
@@ -96,9 +96,9 @@ export async function GET(request: NextRequest) {
     };
   }
 
-  // Variant level filtering
+  // Variant level filtering - STRICTLY IN-STOCK ONLY BY DEFAULT
   const variantWhere: any = {};
-  if (inStockOnly) {
+  if (!showOutOfStock) {
     variantWhere.isAvailable = true;
   }
 
@@ -116,11 +116,9 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  if (Object.keys(variantWhere).length > 0) {
-    whereClause.variants = {
-      some: variantWhere,
-    };
-  }
+  whereClause.variants = {
+    some: variantWhere,
+  };
 
   try {
     const skip = (page - 1) * limit;
@@ -133,7 +131,7 @@ export async function GET(request: NextRequest) {
         include: {
           roaster: true,
           variants: {
-            where: inStockOnly ? { isAvailable: true } : undefined,
+            where: !showOutOfStock ? { isAvailable: true } : undefined,
             orderBy: { pricePer100g: 'asc' },
           },
           flavorNotes: {
