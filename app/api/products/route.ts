@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '18', 10);
 
-  const whereClause: any = {
+  const baseWhere: any = {
     isActive: true,
     NOT: [
       { name: { contains: "Men's Long Sleeve Top" } },
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
   // Search Query
   if (query.trim()) {
-    whereClause.OR = [
+    baseWhere.OR = [
       { name: { contains: query } },
       { description: { contains: query } },
       { originCountry: { contains: query } },
@@ -47,35 +47,35 @@ export async function GET(request: NextRequest) {
 
   // Category filter
   if (categoryParam && categoryParam !== 'All') {
-    whereClause.category = { contains: categoryParam };
+    baseWhere.category = { contains: categoryParam };
   }
 
   // Roaster filter
   if (roastersParam) {
     const slugs = roastersParam.split(',').map((s) => s.trim());
-    whereClause.roaster = { slug: { in: slugs } };
+    baseWhere.roaster = { slug: { in: slugs } };
   }
 
   // Origin filter
   if (originsParam) {
     const origins = originsParam.split(',').map((o) => o.trim());
-    whereClause.originCountry = { in: origins };
+    baseWhere.originCountry = { in: origins };
   }
 
   // Process filter
   if (processParam) {
-    whereClause.process = { contains: processParam };
+    baseWhere.process = { contains: processParam };
   }
 
   // Roast level filter
   if (roastLevelParam) {
-    whereClause.roastLevel = { contains: roastLevelParam };
+    baseWhere.roastLevel = { contains: roastLevelParam };
   }
 
   // Flavor Note filter
   if (flavorNotesParam) {
     const notes = flavorNotesParam.split(',').map((n) => n.trim().toLowerCase());
-    whereClause.flavorNotes = {
+    baseWhere.flavorNotes = {
       some: {
         flavorNote: {
           slug: { in: notes },
@@ -84,12 +84,8 @@ export async function GET(request: NextRequest) {
     };
   }
 
-  // Variant level filtering
+  // Variant price filtering
   const variantWhere: any = {};
-  if (inStockOnly) {
-    variantWhere.isAvailable = true;
-  }
-
   if (maxPriceParam) {
     const parsedMaxPrice = parseFloat(maxPriceParam);
     if (!isNaN(parsedMaxPrice) && parsedMaxPrice < 200) {
@@ -104,48 +100,94 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  if (Object.keys(variantWhere).length > 0) {
-    whereClause.variants = {
-      some: variantWhere,
-    };
-  }
-
   try {
     const skip = (page - 1) * limit;
 
-    const [products, totalCount] = await Promise.all([
-      prisma.product.findMany({
-        where: whereClause,
-        skip,
-        take: limit,
-        include: {
-          roaster: true,
+    // Build In-Stock vs Out-Of-Stock queries to guarantee IN-STOCK items on front pages,
+    // pushing Out-Of-Stock items to the very end of the 1,650+ catalog
+    const inStockWhere: any = {
+      ...baseWhere,
+      variants: {
+        some: {
+          ...variantWhere,
+          isAvailable: true,
+        },
+      },
+    };
+
+    const outOfStockWhere: any = {
+      ...baseWhere,
+      NOT: [
+        ...(baseWhere.NOT || []),
+        {
           variants: {
-            orderBy: { pricePer100g: 'asc' },
-          },
-          flavorNotes: {
-            include: {
-              flavorNote: true,
+            some: {
+              isAvailable: true,
             },
           },
         },
-        orderBy: { id: 'asc' },
-      }),
-      prisma.product.count({ where: whereClause }),
+      ],
+    };
+
+    if (Object.keys(variantWhere).length > 0) {
+      outOfStockWhere.variants = { some: variantWhere };
+    }
+
+    const [inStockCount, outOfStockCount] = await Promise.all([
+      prisma.product.count({ where: inStockWhere }),
+      inStockOnly ? 0 : prisma.product.count({ where: outOfStockWhere }),
     ]);
 
-    // Sort products in-memory so in-stock items are prioritized at the top of the page
-    const sortedProducts = [...products].sort((a, b) => {
-      const aInStock = a.variants.some((v) => v.isAvailable !== false);
-      const bInStock = b.variants.some((v) => v.isAvailable !== false);
-      if (aInStock && !bInStock) return -1;
-      if (!aInStock && bInStock) return 1;
-      return 0;
-    });
+    const totalCount = inStockCount + outOfStockCount;
 
-    const formattedProducts = sortedProducts.map((p) => ({
+    let products: any[] = [];
+
+    const includeOptions = {
+      roaster: true,
+      variants: { orderBy: { pricePer100g: 'asc' as const } },
+      flavorNotes: { include: { flavorNote: true } },
+    };
+
+    if (skip < inStockCount) {
+      // Current page falls within in-stock range
+      const takeInStock = Math.min(limit, inStockCount - skip);
+      const inStockBatch = await prisma.product.findMany({
+        where: inStockWhere,
+        skip,
+        take: takeInStock,
+        include: includeOptions,
+        orderBy: { id: 'asc' },
+      });
+
+      products = [...inStockBatch];
+
+      // If page overflows into out-of-stock range, fetch remainder from out-of-stock
+      if (products.length < limit && !inStockOnly && outOfStockCount > 0) {
+        const needMore = limit - products.length;
+        const outOfStockBatch = await prisma.product.findMany({
+          where: outOfStockWhere,
+          skip: 0,
+          take: needMore,
+          include: includeOptions,
+          orderBy: { id: 'asc' },
+        });
+        products = [...products, ...outOfStockBatch];
+      }
+    } else if (!inStockOnly && outOfStockCount > 0) {
+      // Current page is beyond in-stock range: fetch strictly from out-of-stock
+      const outOfStockSkip = skip - inStockCount;
+      products = await prisma.product.findMany({
+        where: outOfStockWhere,
+        skip: outOfStockSkip,
+        take: limit,
+        include: includeOptions,
+        orderBy: { id: 'asc' },
+      });
+    }
+
+    const formattedProducts = products.map((p) => ({
       ...p,
-      flavorNotes: p.flavorNotes.map((fn) => fn.flavorNote.name),
+      flavorNotes: p.flavorNotes.map((fn: any) => fn.flavorNote.name),
     }));
 
     return NextResponse.json({
