@@ -1,0 +1,139 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Roaster {
+  id                  String         @id @default(uuid())
+  name                String
+  slug                String         @unique
+  websiteUrl          String
+  logoUrl             String?
+  defaultCurrency     String         @default("USD")
+  shippingThreshold   Float?         // Subtotal required for free shipping
+  baseShippingCost    Float          @default(5.00) // Default flat shipping rate
+  syncStatus          String         @default("IDLE") // IDLE, SYNCING, SUCCESS, FAILED
+  syncSource          String         @default("SHOPIFY") // SHOPIFY, WOOCOMMERCE, MANUAL
+  lastSyncAt          DateTime?
+  failedSyncAt        DateTime?
+  syncError           String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  products            Product[]
+  shippingRules       ShippingRule[]
+  affiliateClicks     AffiliateClick[]
+}
+
+model Product {
+  id               String               @id @default(uuid())
+  roasterId        String
+  roaster          Roaster              @relation(fields: [roasterId], references: [id], onDelete: Cascade)
+  name             String
+  slug             String
+  originCountry    String?
+  region           String?
+  farm             String?              // Farm / Estate name
+  producer         String?
+  category         String?              // Espresso, Filter, Omni-roast, Decaf, Cold Brew, Instant
+  process          String?              // Washed, Natural, Honey, Anaerobic, Carbonic Maceration, Experimental
+  roastLevel       String?              // Light, Medium-Light, Medium, Medium-Dark, Dark
+  description      String?
+  imageUrl         String?
+  productUrl       String
+  affiliateUrl     String?
+  affiliateNetwork String?
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  variants         Variant[]
+  flavorNotes      ProductFlavorNote[]
+  affiliateClicks  AffiliateClick[]
+
+  @@unique([roasterId, slug])
+}
+
+model Variant {
+  id           String         @id @default(uuid())
+  productId    String
+  product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  weightG      Float          // e.g. 100, 200, 250, 340, 454, 500, 1000
+  price        Float          // e.g. 18.00
+  pricePer100g Float          // (price / weightG) * 100
+  isBestValue  Boolean        @default(false)
+  sku          String?
+  isAvailable  Boolean        @default(true)
+  stockQuantity Int?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  priceHistories  PriceHistory[]
+  affiliateClicks AffiliateClick[]
+  priceAlerts     PriceAlert[]
+}
+
+model FlavorNote {
+  id       String               @id @default(uuid())
+  name     String               @unique
+  slug     String               @unique
+  products ProductFlavorNote[]
+}
+
+model ProductFlavorNote {
+  productId    String
+  flavorNoteId String
+
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  flavorNote FlavorNote @relation(fields: [flavorNoteId], references: [id], onDelete: Cascade)
+
+  @@id([productId, flavorNoteId])
+}
+
+model PriceHistory {
+  id         String   @id @default(uuid())
+  variantId  String
+  variant    Variant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  price      Float
+  recordedAt DateTime @default(now())
+}
+
+model PriceAlert {
+  id          String   @id @default(uuid())
+  variantId   String
+  variant     Variant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  email       String
+  targetPrice Float
+  isTriggered Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model ShippingRule {
+  id                String   @id @default(uuid())
+  roasterId         String
+  roaster           Roaster  @relation(fields: [roasterId], references: [id], onDelete: Cascade)
+  country           String   @default("US") // 2-letter country code or "ALL"
+  postalCodePattern String?  // e.g. regex pattern or prefix
+  minOrderSubtotal  Float?   // Threshold for rate to apply (e.g., free above $40)
+  shippingCost      Float    // Shipping fee
+  currency          String   @default("USD")
+  providerType      String   @default("STATIC") // STATIC, SHOPIFY, MANUAL
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model AffiliateClick {
+  id         String   @id @default(uuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId  String?
+  variant    Variant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  roasterId  String
+  roaster    Roaster  @relation(fields: [roasterId], references: [id], onDelete: Cascade)
+  referrer   String?
+  clickedAt  DateTime @default(now())
+}

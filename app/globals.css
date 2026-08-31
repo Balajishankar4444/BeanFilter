@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: #faf7f2;
+    color-scheme: light;
+  }
+
+  body {
+    background-color: #faf7f2;
+    color: #1c1917;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: #0f0c0a;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f7f2e8;
+}
+::-webkit-scrollbar-thumb {
+  background: #c28850;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #875235;
+}
+
+/* Background grid */
+.coffee-grid-bg {
+  background-image: radial-gradient(rgba(180, 83, 9, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Smooth Fade-Up Page & Element Animations */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #f5f0eb 25%, #eadece 50%, #f5f0eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Stagger Animation Delays */
+.delay-1 { animation-delay: 0.06s; }
+.delay-2 { animation-delay: 0.14s; }
+.delay-3 { animation-delay: 0.22s; }
+.delay-4 { animation-delay: 0.30s; }
+.delay-5 { animation-delay: 0.38s; }
