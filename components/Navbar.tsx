@@ -12,11 +12,11 @@ function NavbarContent() {
   const searchParams = useSearchParams();
 
   const currentProcess = searchParams?.get('process') || '';
-  const isFavoritesActive = searchParams?.get('favorites') === 'true';
+  const isSavedPageActive = pathname === '/saved';
 
-  const isNaturalActive = pathname === '/catalog' && currentProcess === 'Natural' && !isFavoritesActive;
-  const isAnaerobicActive = pathname === '/catalog' && currentProcess === 'Anaerobic' && !isFavoritesActive;
-  const isCatalogActive = pathname === '/catalog' && !currentProcess && !isFavoritesActive;
+  const isNaturalActive = pathname === '/catalog' && currentProcess === 'Natural' && !isSavedPageActive;
+  const isAnaerobicActive = pathname === '/catalog' && currentProcess === 'Anaerobic' && !isSavedPageActive;
+  const isCatalogActive = pathname === '/catalog' && !currentProcess && !isSavedPageActive;
   const isAdminActive = pathname === '/admin';
 
   const activeClass = 'text-amber-900 border-b-2 border-amber-800 pb-1 font-black';
@@ -80,15 +80,15 @@ function NavbarContent() {
 
         {/* Action Buttons (Saved, Price Alerts, Basket) */}
         <div className="flex items-center gap-2">
-          {/* Saved Coffees Link */}
+          {/* Dedicated Saved Coffees Page Link */}
           <Link
-            href="/catalog?favorites=true"
+            href="/saved"
             className={`relative flex items-center gap-1.5 rounded-2xl border bg-white/90 px-3 py-2.5 text-xs font-extrabold shadow-sm transition-all hover:scale-105 active:scale-95 ${
-              isFavoritesActive
+              isSavedPageActive
                 ? 'border-amber-800 text-amber-900 bg-amber-100/60'
                 : 'border-stone-300 text-stone-800 hover:border-amber-600 hover:text-amber-900'
             }`}
-            title="View saved coffees"
+            title="View saved coffees page"
           >
             <Heart className={`h-4 w-4 ${favorites.length > 0 ? 'fill-amber-700 text-amber-700' : 'text-stone-600'}`} />
             <span className="hidden sm:inline">Saved</span>
@@ -99,7 +99,7 @@ function NavbarContent() {
             )}
           </Link>
 
-          {/* Price Alerts Drawer Button (Next to Saved) */}
+          {/* Price Alerts Drawer Button */}
           <button
             onClick={() => setIsAlertsDrawerOpen(true)}
             className="relative flex items-center gap-1.5 rounded-2xl border border-stone-300 bg-white/90 px-3 py-2.5 text-xs font-extrabold text-stone-800 shadow-sm hover:border-amber-600 hover:text-amber-900 transition-all hover:scale-105 active:scale-95"
