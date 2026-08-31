@@ -6,20 +6,14 @@ import { DoseCalculatorWidget } from '@/components/DoseCalculatorWidget';
 
 export const revalidate = 60;
 
-const NON_COFFEE_KEYWORDS = [
-  'top', 'shirt', 't-shirt', 'tee', 'apparel', 'hat', 'cap', 'mug', 'cup',
-  'sweater', 'merch', 'filter paper', 'filters', 'pin', 'tote', 'hoodie',
-  'socks', 'tumbler', 'grinder', 'kettle', 'dripper', 'aeropress', 'v60',
-  'chemex', 'scale', 'gift card', 'poster', 'sticker', 'towel', 'clothing'
+const SPECIFIC_NON_COFFEE_NAMES = [
+  "men's long sleeve top", "t-shirt", "apparel", "enamel pin", "tote bag", "paper filters"
 ];
 
 function isCoffeeProduct(product: { name: string; category?: string | null }) {
   const nameLower = product.name.toLowerCase();
-  const categoryLower = (product.category || '').toLowerCase();
-
-  for (const kw of NON_COFFEE_KEYWORDS) {
-    // Check whole word or substring match for non-coffee items
-    if (new RegExp(`\\b${kw}\\b`, 'i').test(nameLower) || categoryLower.includes(kw)) {
+  for (const kw of SPECIFIC_NON_COFFEE_NAMES) {
+    if (nameLower.includes(kw)) {
       return false;
     }
   }
@@ -28,6 +22,7 @@ function isCoffeeProduct(product: { name: string; category?: string | null }) {
 
 async function getHomepageData() {
   try {
+    const totalProducts = await prisma.product.count({ where: { isActive: true } });
     const totalRoasters = await prisma.roaster.count();
     const inStockCount = await prisma.variant.count({ where: { isAvailable: true } });
     const origins = await prisma.product.groupBy({
@@ -54,7 +49,7 @@ async function getHomepageData() {
       orderBy: { id: 'asc' },
     });
 
-    // Strictly filter out non-coffee apparel/gear items
+    // Strictly filter out specific non-coffee apparel/gear items
     const coffeeOnlyFeatured = rawFeatured.filter(isCoffeeProduct);
 
     // Interleave across roasters for top diverse quality selection
@@ -82,7 +77,7 @@ async function getHomepageData() {
 
     return {
       stats: {
-        totalProducts: coffeeOnlyFeatured.length,
+        totalProducts,
         totalRoasters,
         originsCount: origins.length,
         inStockCount,

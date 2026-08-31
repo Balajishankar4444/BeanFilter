@@ -15,32 +15,20 @@ export async function GET(request: NextRequest) {
   const flavorNotesParam = searchParams.get('flavorNotes');
   const maxPriceParam = searchParams.get('maxPrice');
   const maxPricePer100gParam = searchParams.get('maxPrice100g');
-  const showOutOfStock = searchParams.get('showOutOfStock') === 'true';
+  const inStockOnly = searchParams.get('inStockOnly') === 'true';
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '18', 10);
 
   const whereClause: any = {
     isActive: true,
     NOT: [
-      { name: { contains: 'Top' } },
-      { name: { contains: 'Shirt' } },
+      { name: { contains: "Men's Long Sleeve Top" } },
       { name: { contains: 'T-Shirt' } },
-      { name: { contains: 'Tee' } },
+      { name: { contains: 'Long Sleeve' } },
       { name: { contains: 'Apparel' } },
-      { name: { contains: 'Hat' } },
-      { name: { contains: 'Cap' } },
-      { name: { contains: 'Mug' } },
-      { name: { contains: 'Cup' } },
-      { name: { contains: 'Sweater' } },
-      { name: { contains: 'Hoodie' } },
-      { name: { contains: 'Paper Filters' } },
-      { name: { contains: 'Filter Paper' } },
-      { name: { contains: 'Pin' } },
-      { name: { contains: 'Tote' } },
-      { name: { contains: 'Socks' } },
-      { name: { contains: 'Gift Card' } },
-      { name: { contains: 'Towel' } },
-      { name: { contains: 'Poster' } },
+      { name: { contains: 'Enamel Pin' } },
+      { name: { contains: 'Tote Bag' } },
+      { name: { contains: 'Coffee Filter Papers' } },
     ],
   };
 
@@ -96,9 +84,9 @@ export async function GET(request: NextRequest) {
     };
   }
 
-  // Variant level filtering - STRICTLY IN-STOCK ONLY BY DEFAULT
+  // Variant level filtering
   const variantWhere: any = {};
-  if (!showOutOfStock) {
+  if (inStockOnly) {
     variantWhere.isAvailable = true;
   }
 
@@ -116,9 +104,11 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  whereClause.variants = {
-    some: variantWhere,
-  };
+  if (Object.keys(variantWhere).length > 0) {
+    whereClause.variants = {
+      some: variantWhere,
+    };
+  }
 
   try {
     const skip = (page - 1) * limit;
@@ -131,7 +121,6 @@ export async function GET(request: NextRequest) {
         include: {
           roaster: true,
           variants: {
-            where: !showOutOfStock ? { isAvailable: true } : undefined,
             orderBy: { pricePer100g: 'asc' },
           },
           flavorNotes: {
@@ -145,7 +134,16 @@ export async function GET(request: NextRequest) {
       prisma.product.count({ where: whereClause }),
     ]);
 
-    const formattedProducts = products.map((p) => ({
+    // Sort products in-memory so in-stock items are prioritized at the top of the page
+    const sortedProducts = [...products].sort((a, b) => {
+      const aInStock = a.variants.some((v) => v.isAvailable !== false);
+      const bInStock = b.variants.some((v) => v.isAvailable !== false);
+      if (aInStock && !bInStock) return -1;
+      if (!aInStock && bInStock) return 1;
+      return 0;
+    });
+
+    const formattedProducts = sortedProducts.map((p) => ({
       ...p,
       flavorNotes: p.flavorNotes.map((fn) => fn.flavorNote.name),
     }));
