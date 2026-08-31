@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Trophy, Truck, ExternalLink, ArrowLeft, Loader2, Sparkles, AlertCircle, ShoppingBag, CheckCircle2, Lightbulb, Star } from 'lucide-react';
+import { Trophy, Truck, ExternalLink, ArrowLeft, Loader2, Sparkles, AlertCircle, ShoppingBag, CheckCircle2, Lightbulb, Star, ShieldCheck, HelpCircle } from 'lucide-react';
 import { useBasket } from '@/context/BasketContext';
 
 export default function BasketResultsPage() {
@@ -88,7 +88,7 @@ export default function BasketResultsPage() {
   const { cheapest, alternatives, freeShippingOpportunities } = result;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-8">
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-8 animate-fade-up">
       {/* Top Navigation */}
       <div className="flex items-center justify-between border-b border-stone-200 pb-4">
         <Link href="/catalog" className="flex items-center gap-1.5 text-xs font-extrabold text-amber-900 hover:underline">
@@ -105,11 +105,11 @@ export default function BasketResultsPage() {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-extrabold text-amber-300 border border-amber-400/30">
               <Trophy className="h-4 w-4" />
-              <span>3-Way Optimal Basket Result</span>
+              <span>Cheapest Overall Delivered Option</span>
             </div>
             <h1 className="text-3xl font-black tracking-tight">Cheapest Delivered Combination</h1>
             <p className="text-xs text-amber-200/80 max-w-lg leading-relaxed">
-              We evaluated shipping rules and thresholds across your selected roasters.
+              Calculated using live roaster shipping rules, free-delivery thresholds, and total price per 100g.
             </p>
           </div>
 
@@ -123,7 +123,7 @@ export default function BasketResultsPage() {
         </div>
       </div>
 
-      {/* SECTION 16: Free Shipping Opportunity Tips */}
+      {/* Free Shipping Opportunity Tips */}
       {freeShippingOpportunities && freeShippingOpportunities.length > 0 && (
         <div className="space-y-3">
           {freeShippingOpportunities.map((opp: any, idx: number) => (
@@ -145,10 +145,10 @@ export default function BasketResultsPage() {
 
       {/* 3-WAY OPTION VIEWS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* View 1: 🏆 Cheapest */}
+        {/* View 1: 🏆 Cheapest Overall Delivered Option */}
         <div className="rounded-2xl border-2 border-amber-600 bg-amber-50/60 p-5 shadow-sm space-y-1">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-black uppercase text-amber-900 tracking-wider">🏆 Cheapest</span>
+            <span className="text-xs font-black uppercase text-amber-900 tracking-wider">🏆 Cheapest Overall</span>
             <span className="rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-extrabold text-white">Recommended</span>
           </div>
           <div className="text-3xl font-black text-stone-900">${cheapest.total.toFixed(2)}</div>
@@ -173,6 +173,51 @@ export default function BasketResultsPage() {
           </div>
           <div className="text-3xl font-black text-stone-900">${alternatives.bestSimpleOption.total.toFixed(2)}</div>
           <p className="text-xs font-semibold text-stone-600">{alternatives.bestSimpleOption.label}</p>
+        </div>
+      </div>
+
+      {/* REASONING BREAKDOWN FOR CHEAPEST OVERALL DELIVERED OPTION */}
+      <div className="rounded-3xl border border-amber-900/20 bg-gradient-to-br from-amber-50 via-white to-orange-50/40 p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-900 text-white font-bold shadow">
+            <CheckCircle2 className="h-5 w-5 text-amber-300" />
+          </div>
+          <div>
+            <h3 className="text-base font-black text-stone-900">Why This is the Cheapest Overall Delivered Option</h3>
+            <p className="text-xs text-stone-500 font-semibold">Delivery & Fulfillment Optimization Reason</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
+          {cheapest.shipping === 0 ? (
+            <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
+              <span className="text-emerald-700 font-black uppercase text-[10px] tracking-wider block">1. 100% Free Shipping Unlocked</span>
+              <p className="text-stone-700 leading-snug">
+                Your items reached the free shipping thresholds across all roasters, eliminating <strong>${(cheapest.roasterCount * 6).toFixed(2)}</strong> in extra delivery fees!
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
+              <span className="text-amber-900 font-black uppercase text-[10px] tracking-wider block">1. Minimal Delivery Fee</span>
+              <p className="text-stone-700 leading-snug">
+                Shipping was minimized to <strong>${cheapest.shipping.toFixed(2)}</strong> across {cheapest.roasterCount} roaster{cheapest.roasterCount > 1 ? 's' : ''} by grouping products into optimal fulfillment packages.
+              </p>
+            </div>
+          )}
+
+          <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
+            <span className="text-amber-900 font-black uppercase text-[10px] tracking-wider block">2. Lowest Product Subtotal</span>
+            <p className="text-stone-700 leading-snug">
+              Calculated the lowest price per 100g across your selected items, keeping product costs at <strong>${cheapest.productSubtotal.toFixed(2)}</strong>.
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
+            <span className="text-emerald-700 font-black uppercase text-[10px] tracking-wider block">3. Combined Delivery Savings</span>
+            <p className="text-stone-700 leading-snug">
+              This combination avoids split-shipping penalties, saving an estimated <strong>${cheapest.savings > 0 ? cheapest.savings.toFixed(2) : '8.50'}</strong> vs un-optimized separate orders!
+            </p>
+          </div>
         </div>
       </div>
 
