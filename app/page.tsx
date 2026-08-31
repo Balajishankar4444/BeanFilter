@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, ShoppingBag, Truck, ExternalLink, Coffee, ArrowRight, ShieldCheck, Sparkles, Trophy, BadgePercent, MapPin, CheckCircle2 } from 'lucide-react';
+import { Search, ShoppingBag, Truck, ExternalLink, Coffee, ArrowRight, ShieldCheck, Sparkles, Trophy, BadgePercent, MapPin, CheckCircle2, Star, HelpCircle } from 'lucide-react';
 import { prisma } from '@/lib/db';
 import { ProductCard } from '@/components/ProductCard';
 import { DoseCalculatorWidget } from '@/components/DoseCalculatorWidget';
@@ -261,6 +261,51 @@ export default async function HomePage() {
           {featuredProducts.map((p: any) => (
             <ProductCard key={p.id} product={p} />
           ))}
+        </div>
+
+        {/* STAR BADGES & RATINGS EXPLANATION BOX */}
+        <div className="rounded-3xl border border-amber-900/20 bg-gradient-to-br from-amber-50 via-white to-orange-50/40 p-6 shadow-sm space-y-4 mt-8">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-900 text-amber-300 font-bold shadow">
+              <Star className="h-5 w-5 fill-amber-300" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-stone-900">What Our ⭐ Star Badges & Ratings Mean</h3>
+              <p className="text-xs text-stone-500 font-semibold">How we rate value & quality across coffee listings</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
+            <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
+              <div className="flex items-center gap-1 text-amber-900 font-black uppercase text-[10px] tracking-wider">
+                <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                <span>⭐ Best Value Bag Size</span>
+              </div>
+              <p className="text-stone-700 leading-snug">
+                Marks the bag size (e.g. 500g or 1kg) offering the lowest price per 100g for that coffee, giving you maximum cup output per dollar.
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
+              <div className="flex items-center gap-1 text-emerald-800 font-black uppercase text-[10px] tracking-wider">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                <span>⭐ Top Specialty Micro-Lot</span>
+              </div>
+              <p className="text-stone-700 leading-snug">
+                Identifies high-grade specialty micro-lots from renowned roasters (Onyx, Sey, Verve) featuring rare varieties, natural/anaerobic processes, and high cup scores.
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-white p-4 border border-stone-200 space-y-1 shadow-sm">
+              <div className="flex items-center gap-1 text-amber-900 font-black uppercase text-[10px] tracking-wider">
+                <BadgePercent className="h-3.5 w-3.5 text-amber-700" />
+                <span>⭐ Cheapest Delivered Option</span>
+              </div>
+              <p className="text-stone-700 leading-snug">
+                Evaluates total delivered price (coffee price + shipping cost to your ZIP code) to ensure you get the absolute cheapest delivered combination.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     </div>
