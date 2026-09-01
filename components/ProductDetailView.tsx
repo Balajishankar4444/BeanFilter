@@ -40,6 +40,17 @@ interface ProductDetailViewProps {
   allHistories?: any[];
 }
 
+function formatWeightLabel(weightG: number): string {
+  if (weightG === 340) return '340g (12 oz)';
+  if (weightG === 454) return '454g (16 oz / 1 lb)';
+  if (weightG === 250) return '250g (8.8 oz)';
+  if (weightG === 142) return '142g (5 oz)';
+  if (weightG === 226) return '226g (8 oz)';
+  if (weightG === 1000) return '1kg (35.2 oz)';
+  const oz = (weightG / 28.3495).toFixed(1);
+  return `${weightG}g (${oz} oz)`;
+}
+
 export function ProductDetailView({ product, initialVariantId, allHistories = [] }: ProductDetailViewProps) {
   const { addToBasket, doseG } = useBasket();
 
@@ -109,7 +120,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
           {/* Favorite Heart Button */}
           <ProductDetailHeartButton productId={product.id} />
 
-          {/* Top Left Origin & Category Badges (Single Straight Horizontal Line) */}
+          {/* Top Left Origin & Category Badges */}
           <div className="absolute top-4 left-4 right-16 flex flex-nowrap items-center gap-1.5 z-10 pointer-events-none overflow-hidden">
             {product.originCountry && (
               <span className="shrink-1 max-w-[120px] truncate rounded-lg bg-stone-900/85 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-amber-100 backdrop-blur-md shadow">
@@ -148,11 +159,11 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
             </div>
           )}
 
-          {/* Gram Bag Size Option Buttons (Interactive Box to Compare Sizes) */}
+          {/* Gram & Ounce Bag Size Option Buttons */}
           <div className="space-y-2.5 rounded-2xl bg-amber-50/60 p-4 border border-amber-900/10">
             <div className="flex items-center justify-between text-xs font-bold text-stone-700">
-              <span>Select Bag Size (Gram Option):</span>
-              <span className="text-amber-900 font-extrabold">{currentVariant.weightG}g Bag</span>
+              <span>Select Bag Size (Grams & Ounces):</span>
+              <span className="text-amber-900 font-extrabold">{formatWeightLabel(currentVariant.weightG)}</span>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -166,7 +177,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
                       : 'bg-white text-stone-800 hover:bg-stone-100 hover:scale-102 border border-stone-200'
                   }`}
                 >
-                  <span>{v.weightG}g</span>
+                  <span>{formatWeightLabel(v.weightG)}</span>
                   <span className="text-[11px] opacity-80">${v.price.toFixed(2)}</span>
                   {v.isBestValue && <span className="text-[10px] text-amber-300 font-black">⭐ Best</span>}
                 </button>
@@ -179,7 +190,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
             <div className="flex items-baseline justify-between">
               <div>
                 <span className="text-3xl font-black text-stone-950">${currentVariant.price.toFixed(2)}</span>
-                <span className="ml-2 text-sm text-stone-500 font-semibold">({currentVariant.weightG}g)</span>
+                <span className="ml-2 text-sm text-stone-500 font-semibold">({formatWeightLabel(currentVariant.weightG)})</span>
               </div>
               <span className="rounded-xl bg-emerald-600 px-3 py-1 text-xs font-black text-white shadow">
                 ${currentVariant.pricePer100g.toFixed(2)} / 100g
@@ -203,7 +214,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
               </div>
             )}
 
-            {/* Action CTAs (Clean, Aligned, Fixed Text Size Layout) */}
+            {/* Action CTAs */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 pt-2 border-t border-stone-100 items-center">
               {/* Primary Add to Basket Button */}
               <button

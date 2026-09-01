@@ -39,6 +39,17 @@ interface ProductData {
   variants: VariantData[];
 }
 
+function formatWeightLabel(weightG: number): string {
+  if (weightG === 340) return '340g (12 oz)';
+  if (weightG === 454) return '454g (16 oz)';
+  if (weightG === 250) return '250g (8.8 oz)';
+  if (weightG === 142) return '142g (5 oz)';
+  if (weightG === 226) return '226g (8 oz)';
+  if (weightG === 1000) return '1kg (35.2 oz)';
+  const oz = (weightG / 28.3495).toFixed(1);
+  return `${weightG}g (${oz} oz)`;
+}
+
 export function ProductCard({ product }: { product: ProductData }) {
   const { addToBasket, doseG, toggleFavorite, isFavorite } = useBasket();
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
@@ -104,7 +115,7 @@ export function ProductCard({ product }: { product: ProductData }) {
       />
 
       <div>
-        {/* Clickable Image & Badges (Opens Selected Variant in New Tab) */}
+        {/* Clickable Image & Badges */}
         <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-2xl bg-amber-50/60">
           <Link href={productDetailUrl} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
             {product.imageUrl ? (
@@ -121,7 +132,7 @@ export function ProductCard({ product }: { product: ProductData }) {
             )}
           </Link>
 
-          {/* Favorite Heart Button (Strict Z-20 Layer) */}
+          {/* Favorite Heart Button */}
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -134,7 +145,7 @@ export function ProductCard({ product }: { product: ProductData }) {
             <Heart className={`h-4 w-4 ${fav ? 'fill-red-500 text-red-500' : ''}`} />
           </button>
 
-          {/* Top Left Origin & Category Badges (Single Straight Horizontal Line, flex-nowrap) */}
+          {/* Top Left Badges */}
           <div className="absolute top-3 left-3 right-12 flex flex-nowrap items-center gap-1 z-10 pointer-events-none overflow-hidden">
             {product.originCountry && (
               <span className="shrink-1 max-w-[95px] truncate rounded-lg bg-stone-900/85 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-100 backdrop-blur-md shadow">
@@ -166,7 +177,7 @@ export function ProductCard({ product }: { product: ProductData }) {
           )}
         </div>
 
-        {/* Product Title (Opens Selected Variant in New Tab) */}
+        {/* Product Title */}
         <h3 className="line-clamp-2 text-base font-black text-stone-900 leading-snug hover:text-amber-800 transition-colors">
           <Link href={productDetailUrl} target="_blank" rel="noopener noreferrer">
             {product.name}
@@ -189,20 +200,20 @@ export function ProductCard({ product }: { product: ProductData }) {
       </div>
 
       <div className="mt-4 space-y-3 pt-3 border-t border-stone-100">
-        {/* Bag Size Variant Selector */}
+        {/* Bag Size Variant Selector (Displaying both Grams AND Ounces) */}
         {product.variants.length > 1 && (
           <div className="flex flex-wrap gap-1.5">
             {product.variants.map((v, idx) => (
               <button
                 key={v.id}
                 onClick={() => setSelectedVariantIndex(idx)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all ${
                   selectedVariantIndex === idx
                     ? 'bg-stone-900 text-white shadow-sm'
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >
-                {v.weightG}g {v.isBestValue && '⭐ Best'}
+                {formatWeightLabel(v.weightG)} {v.isBestValue && '⭐ Best'}
               </button>
             ))}
           </div>
@@ -212,7 +223,9 @@ export function ProductCard({ product }: { product: ProductData }) {
         <div className="flex items-baseline justify-between">
           <div>
             <span className="text-xl font-black text-stone-950">${currentVariant.price.toFixed(2)}</span>
-            <span className="ml-1 text-xs text-stone-500 font-semibold">({currentVariant.weightG}g)</span>
+            <span className="ml-1 text-xs text-stone-500 font-semibold">
+              ({formatWeightLabel(currentVariant.weightG)})
+            </span>
           </div>
 
           <div className="text-right">
