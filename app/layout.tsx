@@ -115,6 +115,10 @@ export const metadata: Metadata = {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
+
+  other: {
+    'impact-site-verification': '2264b258-5d77-4de1-84d3-12edc6971eb2',
+  },
 };
 
 export default function RootLayout({
@@ -124,6 +128,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${jakarta.variable} font-sans`}>
+      <head>
+        <meta name="impact-site-verification" value="2264b258-5d77-4de1-84d3-12edc6971eb2" />
+      </head>
       <body className="min-h-screen flex flex-col justify-between antialiased bg-[#faf7f2] text-stone-900 selection:bg-amber-900 selection:text-amber-50">
         <AuthProvider>
           <BasketProvider>
