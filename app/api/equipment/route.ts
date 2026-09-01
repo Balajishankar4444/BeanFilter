@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       where: {
         OR: [
           { productType: 'EQUIPMENT' },
-          { commerceCategory: { in: ['GRINDER', 'ESPRESSO_MACHINE', 'BREWER', 'KETTLE', 'SCALE', 'SUBSCRIPTION', 'ACCESSORY'] } },
+          { commerceCategory: { in: ['GRINDER', 'ESPRESSO_MACHINE', 'BREWER', 'KETTLE', 'SCALE', 'ACCESSORY'] } },
         ],
       },
       include: {

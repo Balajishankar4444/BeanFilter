@@ -21,6 +21,8 @@ export async function GET(request: NextRequest) {
 
   const baseWhere: any = {
     isActive: true,
+    productType: 'COFFEE',
+    commerceCategory: 'BEANS',
     NOT: [
       { name: { contains: "Men's Long Sleeve Top" } },
       { name: { contains: 'T-Shirt' } },
