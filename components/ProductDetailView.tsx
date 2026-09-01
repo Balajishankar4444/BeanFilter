@@ -8,10 +8,12 @@ import { PriceHistoryChart } from '@/components/PriceHistoryChart';
 import { ProductDetailHeartButton } from '@/components/ProductDetailHeartButton';
 import { PriceAlertModal } from '@/components/PriceAlertModal';
 import { useBasket } from '@/context/BasketContext';
+import { getCurrencySymbol } from '@/lib/formatCurrency';
 
 interface VariantData {
   id: string;
   weightG: number;
+  unitLabel?: string | null;
   price: number;
   pricePer100g: number;
   isBestValue?: boolean;
@@ -32,6 +34,7 @@ interface ProductDetailViewProps {
       id: string;
       name: string;
       shippingThreshold?: number | null;
+      defaultCurrency?: string | null;
     };
     variants: VariantData[];
     flavorNotes: string[];
@@ -40,15 +43,20 @@ interface ProductDetailViewProps {
   allHistories?: any[];
 }
 
-function formatWeightLabel(weightG: number): string {
-  if (weightG === 340) return '340g / 12 oz';
-  if (weightG === 454) return '454g / 16 oz';
-  if (weightG === 250) return '250g / 8.8 oz';
-  if (weightG === 142) return '142g / 5 oz';
-  if (weightG === 226) return '226g / 8 oz';
-  if (weightG === 1000) return '1kg / 35.2 oz';
-  const oz = (weightG / 28.3495).toFixed(1);
-  return `${weightG}g / ${oz} oz`;
+function formatWeightLabel(v: VariantData | number): string {
+  if (typeof v === 'object' && v?.unitLabel) return v.unitLabel;
+  const weightG = typeof v === 'object' ? v.weightG : v;
+  if (Math.abs(weightG - 340) < 5) return '12 oz (340g)';
+  if (Math.abs(weightG - 454) < 5) return '16 oz (1 lb)';
+  if (Math.abs(weightG - 226.8) < 5) return '8 oz (226g)';
+  if (Math.abs(weightG - 141.7) < 5) return '5 oz (142g)';
+  if (Math.abs(weightG - 283.5) < 5) return '10 oz (283g)';
+  if (Math.abs(weightG - 907.2) < 10) return '2 lb (907g)';
+  if (Math.abs(weightG - 2268) < 15) return '5 lb (2.26kg)';
+  if (weightG === 1000) return '1kg (1000g)';
+  if (weightG === 500) return '500g';
+  if (weightG === 250) return '250g';
+  return `${weightG}g`;
 }
 
 export function ProductDetailView({ product, initialVariantId, allHistories = [] }: ProductDetailViewProps) {
@@ -75,9 +83,9 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
   // Filter histories specifically for the selected variant bag size
   const variantHistories = (currentVariant.priceHistories && currentVariant.priceHistories.length > 0)
     ? currentVariant.priceHistories
-    : allHistories.filter((h) => h.variantId === currentVariant.id);
+    : [{ id: currentVariant.id, price: currentVariant.price, recordedAt: (product as any).updatedAt || new Date() }];
 
-  const displayHistories = variantHistories.length > 0 ? variantHistories : allHistories;
+  const displayHistories = variantHistories;
 
   const handleAdd = () => {
     if (!isAvailable) return;
@@ -87,6 +95,8 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
       productName: product.name,
       roasterName: product.roaster.name,
       weightG: currentVariant.weightG,
+      unitLabel: currentVariant.unitLabel,
+      currencyCode: product.roaster.defaultCurrency,
       price: currentVariant.price,
       pricePer100g: currentVariant.pricePer100g,
       imageUrl: product.imageUrl,
@@ -110,7 +120,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
         {/* Product Image */}
         <div className="animate-fade-up delay-2 relative aspect-square overflow-hidden rounded-3xl bg-amber-50/60 border border-stone-200 shadow-md">
           {product.imageUrl ? (
-            <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
+            <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain p-4 bg-white" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-amber-800/30">
               <CupSoda className="h-24 w-24" />
@@ -162,8 +172,10 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
           {/* Gram & Ounce Bag Size Option Buttons */}
           <div className="space-y-2.5 rounded-2xl bg-amber-50/60 p-4 border border-amber-900/10">
             <div className="flex items-center justify-between text-xs font-bold text-stone-700">
-              <span>Select Bag Size (Grams & Ounces):</span>
-              <span className="text-amber-900 font-extrabold whitespace-nowrap">{formatWeightLabel(currentVariant.weightG)}</span>
+              <span>{currentVariant.weightG > 1 ? 'Select Size / Option:' : 'Official Retail Price:'}</span>
+              <span className="text-amber-900 font-extrabold whitespace-nowrap">
+                {currentVariant.weightG > 1 ? formatWeightLabel(currentVariant) : `${getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}${currentVariant.price.toFixed(2)}`}
+              </span>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -177,8 +189,8 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
                       : 'bg-white text-stone-800 hover:bg-stone-100 hover:scale-102 border border-stone-200'
                   }`}
                 >
-                  <span>{formatWeightLabel(v.weightG)}</span>
-                  <span className="text-[11px] opacity-80">${v.price.toFixed(2)}</span>
+                  <span>{formatWeightLabel(v)}</span>
+                  <span className="text-[11px] opacity-80">{getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}{v.price.toFixed(2)}</span>
                   {v.isBestValue && <span className="text-[10px] text-amber-300 font-black">⭐ Best</span>}
                 </button>
               ))}
@@ -189,24 +201,26 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
           <div className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4 shadow-sm">
             <div className="flex items-baseline justify-between gap-2 flex-wrap sm:flex-nowrap">
               <div className="flex items-baseline gap-2 whitespace-nowrap">
-                <span className="text-3xl font-black text-stone-950">${currentVariant.price.toFixed(2)}</span>
+                <span className="text-3xl font-black text-stone-950">{getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}{currentVariant.price.toFixed(2)}</span>
                 <span className="text-xs font-bold text-stone-500 whitespace-nowrap">
-                  ({formatWeightLabel(currentVariant.weightG)})
+                  ({formatWeightLabel(currentVariant)})
                 </span>
               </div>
               <span className="rounded-xl bg-emerald-600 px-3 py-1 text-xs font-black text-white shadow whitespace-nowrap">
-                ${currentVariant.pricePer100g.toFixed(2)} / 100g
+                {currentVariant.weightG > 1 && currentVariant.pricePer100g !== currentVariant.price
+                  ? `${getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}${currentVariant.pricePer100g.toFixed(2)} / 100g`
+                  : `${getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}${currentVariant.price.toFixed(2)}`}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2 text-xs border-t border-stone-100">
               <div className="rounded-xl bg-stone-50 p-2.5">
                 <span className="text-stone-500 font-medium block text-[11px]">Cost per cup ({doseG}g dose):</span>
-                <strong className="text-stone-900 font-extrabold text-sm whitespace-nowrap">${costPerCup} / cup</strong>
+                <strong className="text-stone-900 font-extrabold text-sm whitespace-nowrap">{getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}{costPerCup} / cup</strong>
               </div>
               <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-950">
-                <span className="text-emerald-700 font-medium block text-[11px]">Cafe Savings vs $6 cup:</span>
-                <strong className="text-emerald-700 font-extrabold text-sm whitespace-nowrap">Save ~${cafeSavings}</strong>
+                <span className="text-emerald-700 font-medium block text-[11px]">Cafe Savings vs cafe:</span>
+                <strong className="text-emerald-700 font-extrabold text-sm whitespace-nowrap">Save ~{getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}{cafeSavings}</strong>
               </div>
             </div>
 

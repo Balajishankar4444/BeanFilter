@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
+import { AuthProvider } from '@/context/AuthContext';
 import { BasketProvider } from '@/context/BasketContext';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -125,19 +126,21 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jakarta.variable} font-sans`}>
       <body className="min-h-screen flex flex-col justify-between antialiased bg-[#faf7f2] text-stone-900 selection:bg-amber-900 selection:text-amber-50">
-        <BasketProvider>
-          <Navbar />
+        <AuthProvider>
+          <BasketProvider>
+            <Navbar />
 
-          <main className="flex-1">
-            {children}
-          </main>
+            <main className="flex-1">
+              {children}
+            </main>
 
-          <BasketDrawer />
+            <BasketDrawer />
 
-          <PriceAlertsDrawer />
+            <PriceAlertsDrawer />
 
-          <Footer />
-        </BasketProvider>
+            <Footer />
+          </BasketProvider>
+        </AuthProvider>
       </body>
     </html>
   );

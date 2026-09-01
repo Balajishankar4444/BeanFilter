@@ -102,10 +102,10 @@ export default async function ProductDetailPage({
       {/* Back Link */}
       <div className="animate-fade-up delay-1">
         <Link
-          href="/catalog"
+          href={product.productType === 'EQUIPMENT' ? '/equipment' : '/catalog'}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-amber-900 transition-all hover:scale-105"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to Coffee Catalog
+          <ArrowLeft className="h-4 w-4" /> {product.productType === 'EQUIPMENT' ? 'Back to Equipment Catalog' : 'Back to Coffee Catalog'}
         </Link>
       </div>
 

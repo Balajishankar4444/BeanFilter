@@ -180,8 +180,7 @@ export default async function RoastersPage() {
         averageOrderValue: aff.averageOrderValue,
         affiliateTrackingUrl: aff.trackingUrl,
       };
-    })
-    .filter((r) => r.affiliateStatus === 'confirmed');
+    });
 
   return (
     <main className="min-h-screen bg-[#FAF7F2] text-stone-900 animate-fade-up">

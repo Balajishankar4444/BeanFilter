@@ -105,6 +105,7 @@ export default async function RoasterOrCountryPage({ params }: SlugPageProps) {
         name: roasterInDb.name,
         slug: roasterInDb.slug,
         logoUrl: roasterInDb.logoUrl,
+        defaultCurrency: roasterInDb.defaultCurrency,
       },
       originCountry: p.originCountry,
       region: p.region,

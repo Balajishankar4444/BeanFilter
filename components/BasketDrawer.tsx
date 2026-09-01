@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { X, Trash2, Plus, Minus, ArrowRight, Truck, Coffee, Sparkles, AlertCircle } from 'lucide-react';
 import { useBasket } from '@/context/BasketContext';
+import { getCurrencySymbol } from '@/lib/formatCurrency';
 
 export function BasketDrawer() {
   const {
@@ -136,7 +137,7 @@ export function BasketDrawer() {
                           </span>
                           <h5 className="text-xs font-bold text-stone-900 line-clamp-1">{item.productName}</h5>
                           <div className="text-[11px] text-stone-500 font-medium">
-                            {item.weightG}g · ${item.price.toFixed(2)} (${item.pricePer100g.toFixed(2)}/100g)
+                            {item.unitLabel || `${item.weightG}g`} · {getCurrencySymbol(item.currencyCode)}{item.price.toFixed(2)} ({getCurrencySymbol(item.currencyCode)}{item.pricePer100g.toFixed(2)}/100g)
                           </div>
                         </div>
 
@@ -159,7 +160,7 @@ export function BasketDrawer() {
 
                           <div className="flex items-center gap-2.5">
                             <span className="text-xs font-black text-stone-900">
-                              ${(item.price * item.quantity).toFixed(2)}
+                              {getCurrencySymbol(item.currencyCode)}{(item.price * item.quantity).toFixed(2)}
                             </span>
                             <button
                               onClick={() => removeFromBasket(item.variantId)}

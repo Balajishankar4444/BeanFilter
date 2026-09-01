@@ -101,6 +101,7 @@ model Variant {
   productId    String
   product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
   weightG      Float          // e.g. 100, 200, 250, 340, 454, 500, 1000
+  unitLabel    String?        // e.g. "12 oz", "250g", "16 oz", "1kg", "4 Pack", "10 Count", "1 Box"
   price        Float          // e.g. 18.00
   pricePer100g Float          // (price / weightG) * 100
   isBestValue  Boolean        @default(false)

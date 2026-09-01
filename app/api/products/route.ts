@@ -31,6 +31,17 @@ export async function GET(request: NextRequest) {
       { name: { contains: 'Enamel Pin' } },
       { name: { contains: 'Tote Bag' } },
       { name: { contains: 'Coffee Filter Papers' } },
+      { name: { contains: 'Course' } },
+      { name: { contains: 'Class' } },
+      { name: { contains: 'Workshop' } },
+      { name: { contains: 'Masterclass' } },
+      { name: { contains: 'Syrup' } },
+      { name: { contains: 'Sauce' } },
+      { name: { contains: 'Bowl' } },
+      { name: { contains: 'Gift Card' } },
+      { name: { contains: 'Voucher' } },
+      { name: { contains: 'Subscription' } },
+      { name: { contains: 'Cleaner' } },
     ],
   };
 

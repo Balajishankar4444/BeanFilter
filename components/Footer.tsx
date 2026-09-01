@@ -107,17 +107,58 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Why Bean to Leaf */}
+          {/* Coffee Calculators */}
           <div>
             <h4 className="text-sm font-semibold text-white mb-3">
-              Why Bean to Leaf
+              Coffee Calculators
             </h4>
 
             <ul className="space-y-2 text-xs text-stone-400">
-              <li>🏆 Compare coffee prices</li>
-              <li>📦 Compare delivered costs</li>
-              <li>📊 Price per 100g comparison</li>
-              <li>☕ Cost per cup insights</li>
+              <li>
+                <Link href="/coffee-calculators/coffee-ratio-calculator" className="hover:text-amber-400 transition-colors">
+                  ☕ Coffee Ratio Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/coffee-calculators/pour-over-calculator" className="hover:text-amber-400 transition-colors">
+                  💧 Pour Over Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/coffee-calculators/french-press-calculator" className="hover:text-amber-400 transition-colors">
+                  🫖 French Press Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/coffee-calculators/espresso-ratio-calculator" className="hover:text-amber-400 transition-colors">
+                  ☕ Espresso Ratio Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/coffee-calculators/aeropress-calculator" className="hover:text-amber-400 transition-colors">
+                  🚀 AeroPress Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/coffee-calculators/cold-brew-calculator" className="hover:text-amber-400 transition-colors">
+                  🧊 Cold Brew Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/coffee-calculators/moka-pot-calculator" className="hover:text-amber-400 transition-colors">
+                  🔥 Moka Pot Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/coffee-calculators/coffee-cost-per-cup-calculator" className="hover:text-amber-400 transition-colors">
+                  💰 Cost Per Cup Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/coffee-calculators/coffee-caffeine-calculator" className="hover:text-amber-400 transition-colors">
+                  ⚡ Caffeine Calculator
+                </Link>
+              </li>
             </ul>
           </div>
 

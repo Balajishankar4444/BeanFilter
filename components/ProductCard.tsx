@@ -6,10 +6,12 @@ import Image from 'next/image';
 import { Heart, CupSoda, ExternalLink, Plus, Check, Bell } from 'lucide-react';
 import { useBasket } from '@/context/BasketContext';
 import { PriceAlertModal } from '@/components/PriceAlertModal';
+import { getCurrencySymbol } from '@/lib/formatCurrency';
 
 interface VariantData {
   id: string;
   weightG: number;
+  unitLabel?: string | null;
   price: number;
   pricePer100g: number;
   isBestValue?: boolean;
@@ -25,6 +27,7 @@ interface ProductData {
     name: string;
     slug: string;
     logoUrl?: string | null;
+    defaultCurrency?: string | null;
   };
   originCountry?: string | null;
   region?: string | null;
@@ -39,10 +42,17 @@ interface ProductData {
   variants: VariantData[];
 }
 
-function formatWeightLabel(weightG: number): string {
-  if (weightG >= 1000) {
-    return `${(weightG / 1000).toFixed(weightG % 1000 === 0 ? 0 : 1)}kg`;
-  }
+function formatWeightLabel(v: VariantData | number): string {
+  if (typeof v === 'object' && v?.unitLabel) return v.unitLabel;
+  const weightG = typeof v === 'object' ? v.weightG : v;
+  if (Math.abs(weightG - 340) < 5) return '12 oz';
+  if (Math.abs(weightG - 454) < 5) return '16 oz';
+  if (Math.abs(weightG - 226.8) < 5) return '8 oz';
+  if (Math.abs(weightG - 141.7) < 5) return '5 oz';
+  if (Math.abs(weightG - 283.5) < 5) return '10 oz';
+  if (Math.abs(weightG - 907.2) < 10) return '2 lb';
+  if (Math.abs(weightG - 2268) < 15) return '5 lb';
+  if (weightG >= 1000) return `${(weightG / 1000).toFixed(weightG % 1000 === 0 ? 0 : 1)}kg`;
   return `${weightG}g`;
 }
 
@@ -73,6 +83,8 @@ export function ProductCard({ product }: { product: ProductData }) {
       productName: product.name,
       roasterName: product.roaster.name,
       weightG: currentVariant.weightG,
+      unitLabel: currentVariant.unitLabel,
+      currencyCode: product.roaster.defaultCurrency,
       price: currentVariant.price,
       pricePer100g: currentVariant.pricePer100g,
       imageUrl: product.imageUrl,
@@ -118,7 +130,7 @@ export function ProductCard({ product }: { product: ProductData }) {
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-108"
+                className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-amber-800/20">
@@ -141,7 +153,7 @@ export function ProductCard({ product }: { product: ProductData }) {
           </button>
 
           {/* Top Left Badges */}
-          <div className="absolute top-3 left-3 right-12 flex flex-nowrap items-center gap-1 z-10 overflow-hidden">
+          <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1 z-10">
             {product.originCountry && (
               <span
                 title={product.originCountry}
@@ -153,17 +165,19 @@ export function ProductCard({ product }: { product: ProductData }) {
             {product.category && (
               <span
                 title={product.category}
-                className="shrink-1 max-w-[85px] truncate rounded-lg bg-amber-900/85 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-50 backdrop-blur-md shadow cursor-default"
+                className="whitespace-nowrap rounded-lg bg-amber-900/90 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-50 backdrop-blur-md shadow cursor-default"
               >
                 {product.category}
               </span>
             )}
           </div>
 
-          {/* Price Per 100g Tag */}
+          {/* Price Tag */}
           <div className="absolute bottom-3 right-3 z-10">
             <span className="rounded-xl bg-emerald-600/95 px-2.5 py-1 text-xs font-black text-white shadow-lg backdrop-blur-sm whitespace-nowrap">
-              ${currentVariant.pricePer100g.toFixed(2)} / 100g
+              {currentVariant.weightG > 1 && currentVariant.pricePer100g !== currentVariant.price
+                ? `${getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}${currentVariant.pricePer100g.toFixed(2)} / 100g`
+                : `${getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}${currentVariant.price.toFixed(2)}`}
             </span>
           </div>
         </div>
@@ -201,40 +215,47 @@ export function ProductCard({ product }: { product: ProductData }) {
       </div>
 
       <div className="mt-4 space-y-3 pt-3 border-t border-stone-100">
-        {/* Bag Size Variant Selector (Clean Grams only) */}
-        {product.variants.length > 1 && (
+        {/* Quantity / Size Variant Selector */}
+        {product.variants.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {product.variants.map((v, idx) => (
               <button
                 key={v.id}
-                onClick={() => setSelectedVariantIndex(idx)}
-                className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all whitespace-nowrap ${
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedVariantIndex(idx);
+                }}
+                className={`rounded-lg px-2.5 py-1 text-[11px] font-extrabold transition-all whitespace-nowrap ${
                   selectedVariantIndex === idx
-                    ? 'bg-stone-900 text-white shadow-sm'
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                    ? 'bg-amber-950 text-white shadow-sm ring-1 ring-amber-700'
+                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                 }`}
               >
-                {formatWeightLabel(v.weightG)} {v.isBestValue && '⭐ Best'}
+                {formatWeightLabel(v)} {v.isBestValue && '⭐ Best'}
               </button>
             ))}
           </div>
         )}
 
-        {/* Price & Value Stats (Strictly Grams only on Cards, Single Line whitespace-nowrap) */}
+        {/* Price & Value Stats (Single Line whitespace-nowrap) */}
         <div className="flex items-baseline justify-between gap-2">
           <div className="flex items-baseline gap-1.5 whitespace-nowrap min-w-0">
-            <span className="text-xl font-black text-stone-950 shrink-0">${currentVariant.price.toFixed(2)}</span>
+            <span className="text-xl font-black text-stone-950 shrink-0">
+              {getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}{currentVariant.price.toFixed(2)}
+            </span>
             <span className="text-xs font-bold text-stone-500 whitespace-nowrap truncate">
-              ({formatWeightLabel(currentVariant.weightG)})
+              ({formatWeightLabel(currentVariant)})
             </span>
           </div>
 
           <div className="text-right whitespace-nowrap shrink-0">
             <span className="text-xs font-extrabold text-stone-700 block whitespace-nowrap">
-              ${costPerCup}/cup
+              {getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}{costPerCup}/cup
             </span>
             <span className="text-[10px] font-black text-emerald-600 block whitespace-nowrap">
-              Save ~${cafeSavings} vs cafe
+              Save ~{getCurrencySymbol(product.roaster?.defaultCurrency, product.roaster?.name)}{cafeSavings} vs cafe
             </span>
           </div>
         </div>

@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { ProductCard } from '@/components/ProductCard';
+import { ScrollFadeUp } from '@/components/ScrollFadeUp';
 import { EquipmentItem } from '@/lib/equipmentRegistry';
 import {
   Search,
@@ -235,67 +237,52 @@ export default function EquipmentCatalogClient({ initialEquipment }: EquipmentCa
       {/* 4. EQUIPMENT GRID */}
       <section className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
         {filteredEquipment.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredEquipment.map((item) => (
-              <div
-                key={item.id}
-                className="group flex flex-col justify-between rounded-2xl border border-stone-300 bg-[#F3EBDD] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-stone-400 hover:shadow-md"
-              >
-                <div>
-                  <div className="relative mb-4 h-48 w-full overflow-hidden rounded-xl bg-white border border-stone-300/80">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <span className="absolute top-3 left-3 rounded-full bg-stone-950/80 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white">
-                      {item.bestFor.replace(/ESPRESSO_MACHINE/g, 'Espresso Machines').replace(/GRINDER/g, 'Grinders').replace(/KETTLE/g, 'Kettles').replace(/BREWER/g, 'Brewers').replace(/SCALE/g, 'Scales')}
-                    </span>
-                    <span className="absolute bottom-3 right-3 rounded-full bg-emerald-800 px-2.5 py-0.5 text-[11px] font-bold text-white">
-                      ★ {item.editorialRating} Rating
-                    </span>
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredEquipment.map((item, idx) => {
+              const formattedProduct = {
+                id: item.id,
+                name: item.name,
+                slug: item.slug,
+                roaster: {
+                  id: item.id,
+                  name: item.brand,
+                  slug: item.brand.toLowerCase().replace(/\s+/g, '-'),
+                },
+                category: (function() {
+                  const catUpper = (item.category || '').toUpperCase();
+                  const nameLower = (item.name || '').toLowerCase();
+                  if (catUpper.includes('ESPRESSO') || nameLower.includes('espresso machine') || nameLower.includes('barista express')) return 'Espresso Machine';
+                  if (catUpper.includes('GRINDER') || nameLower.includes('grinder') || nameLower.includes('burr')) return 'Coffee Grinder';
+                  if (catUpper.includes('KETTLE') || nameLower.includes('kettle')) return 'Gooseneck Kettle';
+                  if (catUpper.includes('SCALE') || nameLower.includes('scale')) return 'Barista Scale';
+                  if (catUpper.includes('BREWER') || nameLower.includes('brewer') || nameLower.includes('aeropress') || nameLower.includes('chemex') || nameLower.includes('dripper')) return 'Coffee Brewer';
+                  return 'Coffee Accessory';
+                })(),
+                originCountry: null,
+                process: null,
+                roastLevel: null,
+                flavorNotes: [],
+                description: item.description,
+                imageUrl: item.imageUrl,
+                productUrl: item.affiliateUrl,
+                affiliateUrl: item.affiliateUrl,
+                variants: [
+                  {
+                    id: item.id + '-v1',
+                    weightG: 1,
+                    price: item.price,
+                    pricePer100g: item.price,
+                    isAvailable: true,
+                  },
+                ],
+              };
 
-                  <div className="flex items-center justify-between text-xs font-bold text-stone-600 mb-1">
-                    <span className="text-amber-900 uppercase tracking-wider">{item.brand}</span>
-                    <span className="text-stone-950 text-base font-black">${item.price.toFixed(2)}</span>
-                  </div>
-
-                  <h3 className="text-lg font-semibold tracking-tight text-stone-950 group-hover:text-amber-900 transition-colors">
-                    {item.name}
-                  </h3>
-
-                  <p className="mt-2 text-xs text-stone-600 leading-relaxed line-clamp-3">
-                    {item.description}
-                  </p>
-
-                  {/* Key Features */}
-                  <div className="mt-4 space-y-1.5 border-t border-stone-300/70 pt-3">
-                    {item.features.slice(0, 3).map((feat, idx) => (
-                      <div key={idx} className="flex items-center gap-1.5 text-[11px] font-medium text-stone-700">
-                        <Check size={12} className="text-emerald-700 shrink-0" />
-                        <span>{feat}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-6 border-t border-stone-300/70 pt-4 flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-stone-500">
-                    Partner: {item.affiliateNetwork}
-                  </span>
-                  <a
-                    href={item.affiliateUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-amber-900 px-4 py-2 text-xs font-bold text-white hover:bg-amber-800 transition-colors shadow-sm"
-                  >
-                    <span>Buy at Merchant</span>
-                    <ArrowRight size={13} />
-                  </a>
-                </div>
-              </div>
-            ))}
+              return (
+                <ScrollFadeUp key={item.id} delay={Math.min(idx * 35, 350)}>
+                  <ProductCard product={formattedProduct as any} />
+                </ScrollFadeUp>
+              );
+            })}
           </div>
         ) : (
           <div className="rounded-2xl border border-stone-300 bg-[#F3EBDD] p-12 text-center">

@@ -8,6 +8,8 @@ export interface BasketItem {
   productName: string;
   roasterName: string;
   weightG: number;
+  unitLabel?: string | null;
+  currencyCode?: string | null;
   price: number;
   pricePer100g: number;
   imageUrl?: string | null;

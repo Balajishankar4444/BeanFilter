@@ -11,11 +11,14 @@ import {
   Heart,
   Bell,
   Store,
+  User,
 } from 'lucide-react';
 
 import { useBasket } from '@/context/BasketContext';
+import { useAuth } from '@/context/AuthContext';
 
 function NavbarContent() {
+  const { user } = useAuth();
   const {
     totalCount,
     setIsDrawerOpen,
@@ -31,19 +34,8 @@ function NavbarContent() {
 
   const isSavedPageActive = pathname === '/saved';
 
-  const isNaturalActive =
-    pathname === '/catalog' &&
-    currentProcess === 'Natural' &&
-    !isSavedPageActive;
-
-  const isAnaerobicActive =
-    pathname === '/catalog' &&
-    currentProcess === 'Anaerobic' &&
-    !isSavedPageActive;
-
   const isCatalogActive =
     pathname === '/catalog' &&
-    !currentProcess &&
     !isSavedPageActive;
 
   const isAdminActive = pathname === '/admin';
@@ -104,32 +96,6 @@ function NavbarContent() {
             }`}
           >
             Explore Coffee
-          </Link>
-
-          {/* Natural Process */}
-          <Link
-            href="/catalog?process=Natural"
-            className={`flex items-center gap-1 transition-all hover:text-amber-900 ${
-              isNaturalActive
-                ? activeClass
-                : 'hover:opacity-80'
-            }`}
-          >
-            <span>Natural Process</span>
-
-            <Sparkles className="h-3 w-3 text-amber-600" />
-          </Link>
-
-          {/* Anaerobic */}
-          <Link
-            href="/catalog?process=Anaerobic"
-            className={`transition-all hover:text-amber-900 ${
-              isAnaerobicActive
-                ? activeClass
-                : 'hover:opacity-80'
-            }`}
-          >
-            Anaerobic Coffee
           </Link>
 
           {/* Roasters */}
@@ -251,6 +217,26 @@ function NavbarContent() {
               </span>
             )}
           </button>
+
+          {/* ============================================================
+              FIREBASE LOGIN / USER ACCOUNT
+              ============================================================ */}
+
+          <Link
+            href="/login"
+            className="relative flex items-center gap-1.5 rounded-2xl border border-stone-300 bg-white/90 px-3 py-2.5 text-xs font-extrabold text-stone-800 shadow-sm transition-all hover:scale-105 hover:border-amber-600 hover:text-amber-900 active:scale-95"
+            title={user ? `Logged in as ${user.email}` : 'Sign in to account'}
+          >
+            {user?.photoURL ? (
+              <img src={user.photoURL} alt="Account" className="h-4 w-4 rounded-full" />
+            ) : (
+              <User className={`h-4 w-4 ${user ? 'text-emerald-700' : 'text-stone-600'}`} />
+            )}
+
+            <span className="hidden sm:inline truncate max-w-[80px]">
+              {user ? (user.displayName || user.email?.split('@')[0] || 'Account') : 'Sign In'}
+            </span>
+          </Link>
 
           {/* ============================================================
               BASKET
