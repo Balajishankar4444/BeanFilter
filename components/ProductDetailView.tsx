@@ -41,14 +41,14 @@ interface ProductDetailViewProps {
 }
 
 function formatWeightLabel(weightG: number): string {
-  if (weightG === 340) return '340g (12 oz)';
-  if (weightG === 454) return '454g (16 oz / 1 lb)';
-  if (weightG === 250) return '250g (8.8 oz)';
-  if (weightG === 142) return '142g (5 oz)';
-  if (weightG === 226) return '226g (8 oz)';
-  if (weightG === 1000) return '1kg (35.2 oz)';
+  if (weightG === 340) return '340g / 12 oz';
+  if (weightG === 454) return '454g / 16 oz';
+  if (weightG === 250) return '250g / 8.8 oz';
+  if (weightG === 142) return '142g / 5 oz';
+  if (weightG === 226) return '226g / 8 oz';
+  if (weightG === 1000) return '1kg / 35.2 oz';
   const oz = (weightG / 28.3495).toFixed(1);
-  return `${weightG}g (${oz} oz)`;
+  return `${weightG}g / ${oz} oz`;
 }
 
 export function ProductDetailView({ product, initialVariantId, allHistories = [] }: ProductDetailViewProps) {
@@ -121,14 +121,14 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
           <ProductDetailHeartButton productId={product.id} />
 
           {/* Top Left Origin & Category Badges */}
-          <div className="absolute top-4 left-4 right-16 flex flex-nowrap items-center gap-1.5 z-10 pointer-events-none overflow-hidden">
+          <div className="absolute top-4 left-4 flex flex-wrap items-center gap-1.5 z-10">
             {product.originCountry && (
-              <span className="shrink-1 max-w-[120px] truncate rounded-lg bg-stone-900/85 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-amber-100 backdrop-blur-md shadow">
+              <span className="rounded-lg bg-stone-900/85 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-amber-100 backdrop-blur-md shadow whitespace-nowrap">
                 {product.originCountry}
               </span>
             )}
             {product.category && (
-              <span className="shrink-1 max-w-[110px] truncate rounded-lg bg-amber-900/85 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-amber-50 backdrop-blur-md shadow">
+              <span className="rounded-lg bg-amber-900/85 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-amber-50 backdrop-blur-md shadow whitespace-nowrap">
                 {product.category}
               </span>
             )}
@@ -152,8 +152,8 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
             <div className="space-y-2">
               <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">Flavor Profile</span>
               <div className="flex flex-wrap gap-1.5">
-                {product.flavorNotes.map((note) => (
-                  <FlavorBadge key={note} name={note} />
+                {product.flavorNotes.map((note: string) => (
+                  <FlavorBadge key={note} note={note} />
                 ))}
               </div>
             </div>
@@ -163,7 +163,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
           <div className="space-y-2.5 rounded-2xl bg-amber-50/60 p-4 border border-amber-900/10">
             <div className="flex items-center justify-between text-xs font-bold text-stone-700">
               <span>Select Bag Size (Grams & Ounces):</span>
-              <span className="text-amber-900 font-extrabold">{formatWeightLabel(currentVariant.weightG)}</span>
+              <span className="text-amber-900 font-extrabold whitespace-nowrap">{formatWeightLabel(currentVariant.weightG)}</span>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -171,7 +171,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
                 <button
                   key={v.id}
                   onClick={() => setSelectedVariantIndex(idx)}
-                  className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-extrabold transition-all shadow-sm ${
+                  className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-extrabold transition-all shadow-sm whitespace-nowrap ${
                     selectedVariantIndex === idx
                       ? 'bg-stone-950 text-white ring-2 ring-amber-600 scale-105'
                       : 'bg-white text-stone-800 hover:bg-stone-100 hover:scale-102 border border-stone-200'
@@ -185,14 +185,16 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
             </div>
           </div>
 
-          {/* Pricing & Value Box */}
+          {/* Pricing & Value Box (Clean Single Line, whitespace-nowrap) */}
           <div className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4 shadow-sm">
-            <div className="flex items-baseline justify-between">
-              <div>
+            <div className="flex items-baseline justify-between gap-2 flex-wrap sm:flex-nowrap">
+              <div className="flex items-baseline gap-2 whitespace-nowrap">
                 <span className="text-3xl font-black text-stone-950">${currentVariant.price.toFixed(2)}</span>
-                <span className="ml-2 text-sm text-stone-500 font-semibold">({formatWeightLabel(currentVariant.weightG)})</span>
+                <span className="text-xs font-bold text-stone-500 whitespace-nowrap">
+                  ({formatWeightLabel(currentVariant.weightG)})
+                </span>
               </div>
-              <span className="rounded-xl bg-emerald-600 px-3 py-1 text-xs font-black text-white shadow">
+              <span className="rounded-xl bg-emerald-600 px-3 py-1 text-xs font-black text-white shadow whitespace-nowrap">
                 ${currentVariant.pricePer100g.toFixed(2)} / 100g
               </span>
             </div>
@@ -200,16 +202,16 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
             <div className="grid grid-cols-2 gap-3 pt-2 text-xs border-t border-stone-100">
               <div className="rounded-xl bg-stone-50 p-2.5">
                 <span className="text-stone-500 font-medium block text-[11px]">Cost per cup ({doseG}g dose):</span>
-                <strong className="text-stone-900 font-extrabold text-sm">${costPerCup} / cup</strong>
+                <strong className="text-stone-900 font-extrabold text-sm whitespace-nowrap">${costPerCup} / cup</strong>
               </div>
               <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-950">
                 <span className="text-emerald-700 font-medium block text-[11px]">Cafe Savings vs $6 cup:</span>
-                <strong className="text-emerald-700 font-extrabold text-sm">Save ~${cafeSavings}</strong>
+                <strong className="text-emerald-700 font-extrabold text-sm whitespace-nowrap">Save ~${cafeSavings}</strong>
               </div>
             </div>
 
             {!isAvailable && (
-              <div className="rounded-xl bg-amber-50 p-2.5 text-center text-xs font-bold text-amber-800 border border-amber-200">
+              <div className="rounded-xl bg-amber-50 p-2.5 text-center text-xs font-bold text-amber-800 border border-amber-200 whitespace-nowrap">
                 Out of Stock at Roaster
               </div>
             )}
@@ -220,7 +222,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
               <button
                 onClick={handleAdd}
                 disabled={!isAvailable}
-                className={`sm:col-span-5 flex items-center justify-center gap-1.5 rounded-2xl py-3.5 px-3 text-xs font-extrabold transition-all shadow-md h-12 ${
+                className={`sm:col-span-5 flex items-center justify-center gap-1.5 rounded-2xl py-3.5 px-3 text-xs font-extrabold transition-all shadow-md h-12 whitespace-nowrap ${
                   !isAvailable
                     ? 'bg-stone-100 text-stone-400 cursor-not-allowed border border-stone-200'
                     : addedAnimation
@@ -230,11 +232,11 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
               >
                 {addedAnimation ? (
                   <>
-                    <Check className="h-4 w-4" /> Added!
+                    <Check className="h-4 w-4 shrink-0" /> Added!
                   </>
                 ) : (
                   <>
-                    <Plus className="h-4 w-4" /> Add to Basket
+                    <Plus className="h-4 w-4 shrink-0" /> Add to Basket
                   </>
                 )}
               </button>
@@ -242,7 +244,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
               {/* Price Alert Button */}
               <button
                 onClick={() => setIsAlertModalOpen(true)}
-                className="sm:col-span-2 flex h-12 items-center justify-center rounded-2xl border border-stone-300 bg-white text-stone-700 hover:border-amber-500 hover:text-amber-900 transition-all shadow-sm"
+                className="sm:col-span-2 flex h-12 items-center justify-center rounded-2xl border border-stone-300 bg-white text-stone-700 hover:border-amber-500 hover:text-amber-900 transition-all shadow-sm shrink-0"
                 title="Set Price Alert"
               >
                 <Bell className="h-4 w-4" />
@@ -253,7 +255,7 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
                 href={`/api/redirect/${currentVariant.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="sm:col-span-5 flex items-center justify-center gap-1.5 rounded-2xl bg-amber-900 px-3.5 py-3.5 text-xs font-extrabold text-white shadow-lg hover:bg-amber-800 transition-all hover:scale-105 active:scale-95 h-12 truncate"
+                className="sm:col-span-5 flex items-center justify-center gap-1.5 rounded-2xl bg-amber-900 px-3.5 py-3.5 text-xs font-extrabold text-white shadow-lg hover:bg-amber-800 transition-all hover:scale-105 active:scale-95 h-12 whitespace-nowrap"
               >
                 <span className="truncate">Direct Product Link</span>
                 <ExternalLink className="h-4 w-4 shrink-0" />

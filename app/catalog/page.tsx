@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+export const dynamic = 'force-dynamic';
+
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SlidersHorizontal, Search, Coffee, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { CatalogFilters } from '@/components/CatalogFilters';
@@ -10,7 +12,7 @@ import { useBasket } from '@/context/BasketContext';
 
 const CATEGORIES = ['All', 'Filter', 'Espresso', 'Omni-roast', 'Decaf'];
 
-export default function CatalogPage() {
+function CatalogContent() {
   const searchParams = useSearchParams();
   const { favorites } = useBasket();
 
@@ -100,6 +102,13 @@ export default function CatalogPage() {
       console.error('Failed to fetch products', e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -223,7 +232,7 @@ export default function CatalogPage() {
           ) : (
             <div key={stateKey} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product, idx) => (
-                <ScrollFadeUp key={product.id} delay={idx * 50}>
+                <ScrollFadeUp key={product.id} delay={Math.min(idx * 35, 350)}>
                   <ProductCard product={product} />
                 </ScrollFadeUp>
               ))}
@@ -234,7 +243,7 @@ export default function CatalogPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-6 border-t border-stone-200">
               <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
                 className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-extrabold text-stone-700 disabled:opacity-40 hover:bg-stone-50 transition-all"
               >
@@ -246,7 +255,7 @@ export default function CatalogPage() {
               </span>
 
               <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
                 className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-extrabold text-stone-700 disabled:opacity-40 hover:bg-stone-50 transition-all"
               >
@@ -257,5 +266,18 @@ export default function CatalogPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function CatalogPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center py-20 space-y-3">
+        <Loader2 className="h-10 w-10 animate-spin text-amber-800" />
+        <p className="text-xs font-bold text-stone-600">Loading catalog...</p>
+      </div>
+    }>
+      <CatalogContent />
+    </Suspense>
   );
 }

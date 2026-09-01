@@ -22,7 +22,10 @@ export function getFlavorColorClass(note: string): string {
 export function FlavorBadge({ note }: { note: string }) {
   const colorClass = getFlavorColorClass(note);
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-all ${colorClass}`}>
+    <span
+      title={note}
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-all cursor-pointer ${colorClass}`}
+    >
       {note}
     </span>
   );

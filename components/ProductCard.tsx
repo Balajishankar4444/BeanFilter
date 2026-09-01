@@ -40,14 +40,10 @@ interface ProductData {
 }
 
 function formatWeightLabel(weightG: number): string {
-  if (weightG === 340) return '340g (12 oz)';
-  if (weightG === 454) return '454g (16 oz)';
-  if (weightG === 250) return '250g (8.8 oz)';
-  if (weightG === 142) return '142g (5 oz)';
-  if (weightG === 226) return '226g (8 oz)';
-  if (weightG === 1000) return '1kg (35.2 oz)';
-  const oz = (weightG / 28.3495).toFixed(1);
-  return `${weightG}g (${oz} oz)`;
+  if (weightG >= 1000) {
+    return `${(weightG / 1000).toFixed(weightG % 1000 === 0 ? 0 : 1)}kg`;
+  }
+  return `${weightG}g`;
 }
 
 export function ProductCard({ product }: { product: ProductData }) {
@@ -146,14 +142,20 @@ export function ProductCard({ product }: { product: ProductData }) {
           </button>
 
           {/* Top Left Badges */}
-          <div className="absolute top-3 left-3 right-12 flex flex-nowrap items-center gap-1 z-10 pointer-events-none overflow-hidden">
+          <div className="absolute top-3 left-3 right-12 flex flex-nowrap items-center gap-1 z-10 overflow-hidden">
             {product.originCountry && (
-              <span className="shrink-1 max-w-[95px] truncate rounded-lg bg-stone-900/85 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-100 backdrop-blur-md shadow">
+              <span
+                title={product.originCountry}
+                className="shrink-1 max-w-[95px] truncate rounded-lg bg-stone-900/85 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-100 backdrop-blur-md shadow cursor-default"
+              >
                 {product.originCountry}
               </span>
             )}
             {product.category && (
-              <span className="shrink-1 max-w-[85px] truncate rounded-lg bg-amber-900/85 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-50 backdrop-blur-md shadow">
+              <span
+                title={product.category}
+                className="shrink-1 max-w-[85px] truncate rounded-lg bg-amber-900/85 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-50 backdrop-blur-md shadow cursor-default"
+              >
                 {product.category}
               </span>
             )}
@@ -161,7 +163,7 @@ export function ProductCard({ product }: { product: ProductData }) {
 
           {/* Price Per 100g Tag */}
           <div className="absolute bottom-3 right-3 z-10">
-            <span className="rounded-xl bg-emerald-600/95 px-2.5 py-1 text-xs font-black text-white shadow-lg backdrop-blur-sm">
+            <span className="rounded-xl bg-emerald-600/95 px-2.5 py-1 text-xs font-black text-white shadow-lg backdrop-blur-sm whitespace-nowrap">
               ${currentVariant.pricePer100g.toFixed(2)} / 100g
             </span>
           </div>
@@ -169,9 +171,9 @@ export function ProductCard({ product }: { product: ProductData }) {
 
         {/* Roaster Name & Roast Level */}
         <div className="mb-1 flex items-center justify-between text-xs font-black tracking-widest text-amber-800 uppercase">
-          <span>{product.roaster.name}</span>
+          <span className="truncate">{product.roaster.name}</span>
           {product.process && (
-            <span className="rounded bg-amber-100/80 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+            <span className="shrink-0 rounded bg-amber-100/80 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
               {product.process}
             </span>
           )}
@@ -190,7 +192,7 @@ export function ProductCard({ product }: { product: ProductData }) {
             {product.flavorNotes.slice(0, 3).map((note, idx) => (
               <span
                 key={idx}
-                className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600"
+                className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600 whitespace-nowrap"
               >
                 {note}
               </span>
@@ -200,14 +202,14 @@ export function ProductCard({ product }: { product: ProductData }) {
       </div>
 
       <div className="mt-4 space-y-3 pt-3 border-t border-stone-100">
-        {/* Bag Size Variant Selector (Displaying both Grams AND Ounces) */}
+        {/* Bag Size Variant Selector (Clean Grams only) */}
         {product.variants.length > 1 && (
           <div className="flex flex-wrap gap-1.5">
             {product.variants.map((v, idx) => (
               <button
                 key={v.id}
                 onClick={() => setSelectedVariantIndex(idx)}
-                className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all ${
+                className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all whitespace-nowrap ${
                   selectedVariantIndex === idx
                     ? 'bg-stone-900 text-white shadow-sm'
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
@@ -219,20 +221,20 @@ export function ProductCard({ product }: { product: ProductData }) {
           </div>
         )}
 
-        {/* Price & Value Stats */}
-        <div className="flex items-baseline justify-between">
-          <div>
-            <span className="text-xl font-black text-stone-950">${currentVariant.price.toFixed(2)}</span>
-            <span className="ml-1 text-xs text-stone-500 font-semibold">
+        {/* Price & Value Stats (Strictly Grams only on Cards, Single Line whitespace-nowrap) */}
+        <div className="flex items-baseline justify-between gap-2">
+          <div className="flex items-baseline gap-1.5 whitespace-nowrap min-w-0">
+            <span className="text-xl font-black text-stone-950 shrink-0">${currentVariant.price.toFixed(2)}</span>
+            <span className="text-xs font-bold text-stone-500 whitespace-nowrap truncate">
               ({formatWeightLabel(currentVariant.weightG)})
             </span>
           </div>
 
-          <div className="text-right">
-            <span className="text-xs font-bold text-stone-600 block">
+          <div className="text-right whitespace-nowrap shrink-0">
+            <span className="text-xs font-extrabold text-stone-700 block whitespace-nowrap">
               ${costPerCup}/cup
             </span>
-            <span className="text-[10px] font-extrabold text-emerald-600 block">
+            <span className="text-[10px] font-black text-emerald-600 block whitespace-nowrap">
               Save ~${cafeSavings} vs cafe
             </span>
           </div>
@@ -240,7 +242,7 @@ export function ProductCard({ product }: { product: ProductData }) {
 
         {/* Out of Stock Warning */}
         {!isAvailable && (
-          <div className="rounded-xl bg-amber-50 p-2 text-center text-xs font-bold text-amber-800 border border-amber-200">
+          <div className="rounded-xl bg-amber-50 p-2 text-center text-xs font-bold text-amber-800 border border-amber-200 whitespace-nowrap">
             Out of Stock at Roaster
           </div>
         )}
@@ -250,7 +252,7 @@ export function ProductCard({ product }: { product: ProductData }) {
           <button
             onClick={handleAdd}
             disabled={!isAvailable}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-2xl py-2.5 text-xs font-black transition-all ${
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-2xl py-2.5 text-xs font-black transition-all whitespace-nowrap ${
               !isAvailable
                 ? 'bg-stone-100 text-stone-400 cursor-not-allowed border border-stone-200'
                 : addedAnimation
@@ -260,11 +262,11 @@ export function ProductCard({ product }: { product: ProductData }) {
           >
             {addedAnimation ? (
               <>
-                <Check className="h-4 w-4" /> Added!
+                <Check className="h-4 w-4 shrink-0" /> Added!
               </>
             ) : (
               <>
-                <Plus className="h-4 w-4" /> Basket
+                <Plus className="h-4 w-4 shrink-0" /> Basket
               </>
             )}
           </button>
@@ -272,7 +274,7 @@ export function ProductCard({ product }: { product: ProductData }) {
           {/* Price Alert Button */}
           <button
             onClick={() => setIsAlertModalOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-stone-300 bg-white text-stone-600 hover:border-amber-500 hover:text-amber-900 transition-all shadow-sm"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-stone-300 bg-white text-stone-600 hover:border-amber-500 hover:text-amber-900 transition-all shadow-sm"
             title="Set Price Drop Alert"
           >
             <Bell className="h-4 w-4" />
@@ -284,7 +286,7 @@ export function ProductCard({ product }: { product: ProductData }) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleBuyClick}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100 hover:text-amber-900 transition-all shadow-sm"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100 hover:text-amber-900 transition-all shadow-sm"
             title={`Buy direct from ${product.roaster.name}`}
           >
             <ExternalLink className="h-4 w-4" />

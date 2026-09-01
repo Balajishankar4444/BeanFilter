@@ -146,10 +146,10 @@ export default async function ProductDetailPage({
             </p>
           </div>
 
-          {/* Pairings Grid with ScrollFadeUp Motion */}
+          {/* Pairings Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {related.map((p, idx) => (
-              <ScrollFadeUp key={p.id} delay={idx * 100}>
+              <ScrollFadeUp key={p.id} delay={idx * 60}>
                 <ProductCard product={p as any} />
               </ScrollFadeUp>
             ))}

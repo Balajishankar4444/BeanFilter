@@ -39,27 +39,28 @@ export async function GET(
       console.error('Failed to log affiliate click event', e);
     }
 
-    let targetUrl = variant.product.affiliateUrl || variant.product.productUrl || variant.product.roaster.websiteUrl;
+    // Always prioritize official product page URL to prevent 404 errors
+    let rawTarget = variant.product.affiliateUrl || variant.product.productUrl || variant.product.roaster.websiteUrl;
 
-    // If numerical Shopify variant ID (sku) exists, redirect directly to Shopify pre-filled cart checkout page!
-    if (variant.sku && !isNaN(Number(variant.sku))) {
-      const roasterDomain = variant.product.roaster.websiteUrl.replace(/\/$/, '');
-      targetUrl = `${roasterDomain}/cart/${variant.sku}:1?ref=beandeals&utm_source=beandeals&utm_medium=aggregator`;
-    } else {
-      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-        targetUrl = `https://${targetUrl}`;
-      }
-
-      if (!variant.product.affiliateUrl && !targetUrl.includes('ref=')) {
-        const urlObj = new URL(targetUrl);
-        urlObj.searchParams.set('ref', 'beandeals');
-        urlObj.searchParams.set('utm_source', 'beandeals');
-        urlObj.searchParams.set('utm_medium', 'aggregator');
-        targetUrl = urlObj.toString();
-      }
+    if (!rawTarget.startsWith('http://') && !rawTarget.startsWith('https://')) {
+      rawTarget = `https://${rawTarget}`;
     }
 
-    return NextResponse.redirect(targetUrl, 302);
+    const urlObj = new URL(rawTarget);
+
+    // Append variant SKU to automatically pre-select bag size on roaster website
+    if (variant.sku && !urlObj.searchParams.has('variant')) {
+      urlObj.searchParams.set('variant', variant.sku);
+    }
+
+    // Append tracking parameters
+    if (!urlObj.searchParams.has('ref')) {
+      urlObj.searchParams.set('ref', 'beandeals');
+      urlObj.searchParams.set('utm_source', 'beandeals');
+      urlObj.searchParams.set('utm_medium', 'aggregator');
+    }
+
+    return NextResponse.redirect(urlObj.toString(), 302);
   } catch (err: any) {
     console.error('Error handling affiliate redirect:', err);
     return NextResponse.redirect(new URL('/catalog', request.url));
