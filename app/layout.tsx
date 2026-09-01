@@ -1,12 +1,19 @@
 import type { Metadata } from 'next';
+
 import { Plus_Jakarta_Sans } from 'next/font/google';
+
 import './globals.css';
 
 import { AuthProvider } from '@/context/AuthContext';
+
 import { BasketProvider } from '@/context/BasketContext';
+
 import { Navbar } from '@/components/Navbar';
+
 import { Footer } from '@/components/Footer';
+
 import { BasketDrawer } from '@/components/BasketDrawer';
+
 import { PriceAlertsDrawer } from '@/components/PriceAlertsDrawer';
 
 const jakarta = Plus_Jakarta_Sans({
@@ -26,7 +33,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    'Compare specialty coffee prices across trusted roasters and find the best overall delivered price. Compare price per 100g, cost per cup, shipping and basket savings.',
+    'Compare specialty coffee prices from trusted roasters and find the best overall delivered price. Compare price per 100g, cost per cup, shipping and basket savings.',
 
   applicationName: 'Leaf to Bean',
 
@@ -36,17 +43,16 @@ export const metadata: Metadata = {
     'coffee price comparison',
     'coffee deals',
     'best coffee deals',
-    'cheap specialty coffee',
+    'specialty coffee roasters',
     'coffee price per 100g',
     'coffee cost per cup',
     'coffee roaster comparison',
-    'specialty coffee roasters',
     'coffee shipping comparison',
-    'cheapest coffee delivered',
+    'cheapest specialty coffee',
+    'best specialty coffee prices',
+    'buy specialty coffee',
     'coffee basket optimizer',
     'coffee shopping',
-    'buy specialty coffee',
-    'best specialty coffee prices',
   ],
 
   authors: [
@@ -58,12 +64,7 @@ export const metadata: Metadata = {
 
   creator: 'Leaf to Bean',
   publisher: 'Leaf to Bean',
-
   category: 'Shopping',
-
-  alternates: {
-    canonical: '/',
-  },
 
   openGraph: {
     type: 'website',
@@ -74,7 +75,7 @@ export const metadata: Metadata = {
     title: 'Specialty Coffee Price Comparison & Best Deals | Leaf to Bean',
 
     description:
-      'Compare specialty coffee across trusted roasters and find the cheapest overall delivered option, including coffee prices, shipping and free-shipping thresholds.',
+      'Compare specialty coffee prices across trusted roasters and find the best overall delivered price, including coffee prices, shipping and free-shipping thresholds.',
 
     images: [
       {
@@ -104,14 +105,12 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-
       'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
   },
 
-  // Browser tab favicon
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
