@@ -115,11 +115,14 @@ export function ProductCard({ product }: { product: ProductData }) {
         <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-2xl bg-amber-50/60">
           <Link href={productDetailUrl} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
             {product.imageUrl ? (
-              <Image
+              <img
                 src={product.imageUrl}
                 alt={product.name}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-108"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&auto=format&fit=crop&q=80';
+                }}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-108"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-amber-800/20">

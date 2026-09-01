@@ -146,6 +146,30 @@ function NavbarContent() {
             <span>Roasters</span>
           </Link>
 
+          {/* Equipment */}
+          <Link
+            href="/equipment"
+            className={`transition-all hover:text-amber-900 ${
+              pathname === '/equipment'
+                ? activeClass
+                : 'hover:opacity-80'
+            }`}
+          >
+            Equipment
+          </Link>
+
+          {/* Subscriptions */}
+          <Link
+            href="/coffee-subscriptions"
+            className={`transition-all hover:text-amber-900 ${
+              pathname === '/coffee-subscriptions'
+                ? activeClass
+                : 'hover:opacity-80'
+            }`}
+          >
+            Subscriptions
+          </Link>
+
           {/* Admin */}
           <Link
             href="/admin"

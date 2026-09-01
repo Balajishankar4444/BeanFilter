@@ -32,6 +32,14 @@ export interface EnrichedRoaster {
   tags: string[];
   isFeatured?: boolean;
   productCount: number;
+  businessType: 'ROASTER' | 'RETAILER' | 'SUBSCRIPTION' | 'BRAND' | 'EQUIPMENT';
+  affiliateStatus: 'confirmed' | 'unverified' | 'needs_verification' | 'none';
+  affiliateNetwork?: string;
+  commissionRate?: number;
+  commissionDescription?: string;
+  cookieDays?: number;
+  averageOrderValue?: number;
+  affiliateTrackingUrl?: string;
 }
 
 interface RoasterDirectoryClientProps {
@@ -42,6 +50,8 @@ export default function RoasterDirectoryClient({ initialRoasters }: RoasterDirec
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<string>('ALL');
   const [selectedStyle, setSelectedStyle] = useState<string>('ALL');
+  const [selectedBusinessType, setSelectedBusinessType] = useState<string>('ALL');
+  const [onlyAffiliates, setOnlyAffiliates] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<'recommended' | 'name' | 'products'>('recommended');
   const [selectedTaste, setSelectedTaste] = useState<string | null>(null);
 
@@ -84,6 +94,16 @@ export default function RoasterDirectoryClient({ initialRoasters }: RoasterDirec
 
         // Style filter
         if (selectedStyle !== 'ALL' && !r.tags.includes(selectedStyle)) {
+          return false;
+        }
+
+        // Business Type filter
+        if (selectedBusinessType !== 'ALL' && r.businessType !== selectedBusinessType) {
+          return false;
+        }
+
+        // Only Confirmed Affiliate Partners filter
+        if (onlyAffiliates && r.affiliateStatus !== 'confirmed') {
           return false;
         }
 
@@ -362,7 +382,7 @@ export default function RoasterDirectoryClient({ initialRoasters }: RoasterDirec
                       {roaster.productCount} {roaster.productCount === 1 ? 'Coffee' : 'Coffees'} Available
                     </span>
                     <Link
-                      href={`/catalog?roasters=${roaster.slug}`}
+                      href={`/roasters/${roaster.slug}`}
                       className="inline-flex items-center gap-1 text-xs font-semibold text-stone-900 group-hover:translate-x-0.5 transition-transform"
                     >
                       <span>View Roaster</span>
@@ -440,6 +460,33 @@ export default function RoasterDirectoryClient({ initialRoasters }: RoasterDirec
               </select>
               <ChevronDown className="pointer-events-none absolute right-2.5 top-2.5 h-4 w-4 text-stone-500" />
             </div>
+            {/* Business Type Dropdown */}
+            <div className="relative">
+              <select
+                value={selectedBusinessType}
+                onChange={(e) => setSelectedBusinessType(e.target.value)}
+                className="appearance-none rounded-xl border border-stone-300 bg-[#FAF7F2] py-2 pl-3 pr-8 text-sm font-medium text-stone-800 outline-none hover:border-stone-400"
+              >
+                <option value="ALL">All Categories</option>
+                <option value="ROASTER">Specialty Roaster</option>
+                <option value="RETAILER">Marketplace / Retailer</option>
+                <option value="SUBSCRIPTION">Subscription Service</option>
+                <option value="BRAND">Coffee Brand</option>
+                <option value="EQUIPMENT">Equipment Retailer</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2.5 top-2.5 h-4 w-4 text-stone-500" />
+            </div>
+
+            {/* Affiliate Partner Toggle */}
+            <label className="inline-flex items-center gap-2 cursor-pointer rounded-xl border border-stone-300 bg-[#FAF7F2] py-2 px-3 text-sm font-medium text-stone-800 hover:border-stone-400">
+              <input
+                type="checkbox"
+                checked={onlyAffiliates}
+                onChange={(e) => setOnlyAffiliates(e.target.checked)}
+                className="h-4 w-4 rounded border-stone-300 text-amber-900 focus:ring-amber-800"
+              />
+              <span>Affiliate Partners</span>
+            </label>
           </div>
 
           {/* Sort Dropdown */}
@@ -492,7 +539,7 @@ export default function RoasterDirectoryClient({ initialRoasters }: RoasterDirec
               >
                 <div>
                   {/* Top area */}
-                  <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-stone-300 bg-[#FAF7F2] font-bold text-stone-800 overflow-hidden shrink-0">
                       {roaster.logoUrl ? (
                         <img
@@ -504,11 +551,25 @@ export default function RoasterDirectoryClient({ initialRoasters }: RoasterDirec
                         roaster.name.substring(0, 2).toUpperCase()
                       )}
                     </div>
-                    {roaster.productCount > 0 && (
-                      <span className="rounded-full bg-stone-300/70 px-3 py-1 text-xs font-semibold text-stone-700">
-                        {roaster.productCount} {roaster.productCount === 1 ? 'Coffee' : 'Coffees'}
-                      </span>
-                    )}
+
+                    <div className="flex flex-col items-end gap-1">
+                      {roaster.affiliateStatus === 'confirmed' ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-600/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                          <Check size={11} className="text-emerald-700" />
+                          Affiliate Partner
+                        </span>
+                      ) : (
+                        <span className="rounded-full border border-stone-300/80 bg-stone-200/60 px-2.5 py-0.5 text-[10px] font-medium text-stone-600">
+                          Roaster Directory
+                        </span>
+                      )}
+
+                      {roaster.productCount > 0 && (
+                        <span className="rounded-full bg-stone-300/70 px-2.5 py-0.5 text-[10px] font-semibold text-stone-700">
+                          {roaster.productCount} {roaster.productCount === 1 ? 'Coffee' : 'Coffees'}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <h3 className="text-xl font-semibold tracking-tight text-stone-950 group-hover:text-amber-900 transition-colors">
@@ -526,9 +587,15 @@ export default function RoasterDirectoryClient({ initialRoasters }: RoasterDirec
                     {roaster.description}
                   </p>
 
-                  {/* Shipping threshold indicator */}
+                  {/* Commission / Shipping Details */}
+                  {roaster.affiliateStatus === 'confirmed' && roaster.commissionDescription && (
+                    <div className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      <span>💡 {roaster.commissionDescription}</span>
+                    </div>
+                  )}
+
                   {roaster.shippingThreshold && (
-                    <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-medium text-stone-600">
+                    <div className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-medium text-stone-600">
                       <span>🚚 Free shipping over ${roaster.shippingThreshold}</span>
                     </div>
                   )}
@@ -548,19 +615,19 @@ export default function RoasterDirectoryClient({ initialRoasters }: RoasterDirec
 
                 <div className="mt-6 border-t border-stone-300/70 pt-4 flex items-center justify-between">
                   <a
-                    href={roaster.websiteUrl}
+                    href={roaster.affiliateTrackingUrl || roaster.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-stone-500 hover:text-stone-800 transition-colors flex items-center gap-1"
+                    className="text-xs text-stone-600 hover:text-stone-950 transition-colors flex items-center gap-1 font-medium"
                   >
                     <Globe size={12} />
-                    <span>Website</span>
+                    <span>{roaster.affiliateStatus === 'confirmed' ? `Buy at ${roaster.name}` : 'Visit Website'}</span>
                   </a>
                   <Link
-                    href={`/catalog?roasters=${roaster.slug}`}
+                    href={`/roasters/${roaster.slug}`}
                     className="inline-flex items-center gap-1 text-xs font-semibold text-stone-900 group-hover:translate-x-0.5 transition-transform"
                   >
-                    <span>View Roaster</span>
+                    <span>View Coffees</span>
                     <ArrowRight size={14} />
                   </Link>
                 </div>

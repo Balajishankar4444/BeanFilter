@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { prisma } from '@/lib/db';
+import { getAffiliateDetails } from '@/lib/affiliateRegistry';
 import RoasterDirectoryClient, { EnrichedRoaster } from './RoasterDirectoryClient';
 
 export const dynamic = 'force-dynamic';
@@ -143,32 +144,44 @@ export default async function RoastersPage() {
     console.error('Failed to load roasters from database:', error);
   }
 
-  const initialRoasters: EnrichedRoaster[] = dbRoasters.map((r) => {
-    const meta = ROASTER_METADATA[r.slug] || {
-      city: 'Specialty Roastery',
-      country: 'United States',
-      description: 'Independent specialty coffee roaster dedicated to sourcing exceptional green coffees.',
-      tags: ['Specialty', 'Single Origin'],
-      isFeatured: false,
-    };
+  const initialRoasters: EnrichedRoaster[] = dbRoasters
+    .map((r) => {
+      const meta = ROASTER_METADATA[r.slug] || {
+        city: 'Specialty Roastery',
+        country: 'United States',
+        description: 'Independent specialty coffee roaster dedicated to sourcing exceptional green coffees.',
+        tags: ['Specialty', 'Single Origin'],
+        isFeatured: false,
+      };
 
-    return {
-      id: r.id,
-      name: r.name,
-      slug: r.slug,
-      websiteUrl: r.websiteUrl,
-      logoUrl: r.logoUrl,
-      defaultCurrency: r.defaultCurrency || 'USD',
-      shippingThreshold: r.shippingThreshold,
-      baseShippingCost: r.baseShippingCost || 5.0,
-      city: meta.city,
-      country: meta.country,
-      description: meta.description,
-      tags: meta.tags,
-      isFeatured: meta.isFeatured,
-      productCount: r._count?.products || 0,
-    };
-  });
+      const aff = getAffiliateDetails(r.slug);
+
+      return {
+        id: r.id,
+        name: r.name,
+        slug: r.slug,
+        websiteUrl: r.websiteUrl,
+        logoUrl: r.logoUrl,
+        defaultCurrency: r.defaultCurrency || 'USD',
+        shippingThreshold: r.shippingThreshold,
+        baseShippingCost: r.baseShippingCost || 5.0,
+        city: aff.city !== 'Unknown' ? aff.city : meta.city,
+        country: aff.country !== 'United States' ? aff.country : meta.country,
+        description: meta.description,
+        tags: meta.tags,
+        isFeatured: meta.isFeatured,
+        productCount: r._count?.products || 0,
+        businessType: aff.businessType,
+        affiliateStatus: aff.status,
+        affiliateNetwork: aff.network,
+        commissionRate: aff.commission?.value,
+        commissionDescription: aff.commission?.description,
+        cookieDays: aff.cookieDays,
+        averageOrderValue: aff.averageOrderValue,
+        affiliateTrackingUrl: aff.trackingUrl,
+      };
+    })
+    .filter((r) => r.affiliateStatus === 'confirmed');
 
   return (
     <main className="min-h-screen bg-[#FAF7F2] text-stone-900 animate-fade-up">

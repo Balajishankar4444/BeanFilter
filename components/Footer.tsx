@@ -86,6 +86,24 @@ export function Footer() {
                   Coffee Roasters Directory
                 </Link>
               </li>
+
+              <li>
+                <Link
+                  href="/equipment"
+                  className="hover:text-amber-400 transition-colors"
+                >
+                  Coffee Equipment & Grinders
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/coffee-subscriptions"
+                  className="hover:text-amber-400 transition-colors"
+                >
+                  Coffee Subscriptions
+                </Link>
+              </li>
             </ul>
           </div>
 

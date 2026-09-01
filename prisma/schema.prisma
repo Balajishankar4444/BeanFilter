@@ -21,6 +21,30 @@ model Roaster {
   lastSyncAt          DateTime?
   failedSyncAt        DateTime?
   syncError           String?
+  
+  // Business Classification & Location
+  businessType        String         @default("ROASTER") // ROASTER, RETAILER, SUBSCRIPTION, BRAND, EQUIPMENT
+  country             String         @default("United States")
+  countryCode         String         @default("US")
+  city                String         @default("Unknown")
+  
+  // Affiliate Verification & Partner Fields
+  affiliateTier       String         @default("DIRECTORY") // FEATURED_AFFILIATE, AFFILIATE_VERIFIED, AFFILIATE_PENDING, DIRECTORY
+  affiliateStatus     String         @default("unverified") // confirmed, unverified, needs_verification, none
+  affiliateNetwork    String?        // Awin, Impact, ShareASale, FlexOffers, Adtraction, CJ, TradeTracker, Direct
+  commissionType      String?        // percentage, fixed, mixed
+  commissionRate      Float?         // e.g. 10.0 for 10%
+  cookieDays          Int?           @default(30)
+  averageOrderValue   Float?         // e.g. 75.00
+  commercialYieldScore Float         @default(50.0) // Internal yield formula score
+  editorialScore       Float         @default(90.0)
+
+  subscriptionAvailable Boolean      @default(false)
+  productFeedAvailable Boolean       @default(false)
+  affiliateTrackingUrl String?
+  verifiedAt          DateTime?
+  sourceUrl           String?
+
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 
@@ -47,6 +71,20 @@ model Product {
   productUrl       String
   affiliateUrl     String?
   affiliateNetwork String?
+  
+  // Commerce Graph & Equipment Attributes
+  productType      String               @default("COFFEE") // COFFEE, EQUIPMENT, GIFT_BOX, ACCESSORY
+  equipmentCategory String?             // GRINDER, ESPRESSO_MACHINE, BREWER, SCALE, KETTLE
+  commerceCategory String               @default("BEANS") // BEANS, GRINDER, ESPRESSO_MACHINE, BREWER, KETTLE, SCALE, SUBSCRIPTION, GIFT
+  brand            String?              // Baratza, Fellow, Breville, De'Longhi, Gaggia, Rancilio, Acaia, Atlas
+  grindType        String?              // Burr, Conical, Flat
+  burrSizeMm       Float?               // e.g. 40, 54, 64
+  boilerType       String?              // Single, Dual, Thermoblock
+  kettleCapacityMl Int?                 // e.g. 900, 1000
+  subscriptionFreq String?              // Weekly, Bi-weekly, Monthly
+  espressoSuitable Boolean              @default(true)
+  editorialRating  Float?               @default(4.8)
+
   isActive         Boolean              @default(true)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
