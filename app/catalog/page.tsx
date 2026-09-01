@@ -1,16 +1,16 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Loader2, SlidersHorizontal, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
-import { ProductCard } from '@/components/ProductCard';
+import { SlidersHorizontal, Search, Coffee, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { CatalogFilters } from '@/components/CatalogFilters';
+import { ProductCard } from '@/components/ProductCard';
 import { ScrollFadeUp } from '@/components/ScrollFadeUp';
 import { useBasket } from '@/context/BasketContext';
 
-const CATEGORIES = ['All', 'Filter', 'Espresso', 'Decaf', 'Cold Brew', 'Omni-roast'];
+const CATEGORIES = ['All', 'Filter', 'Espresso', 'Omni-roast', 'Decaf'];
 
-function CatalogContent() {
+export default function CatalogPage() {
   const searchParams = useSearchParams();
   const { favorites } = useBasket();
 
@@ -31,7 +31,6 @@ function CatalogContent() {
   const [maxBagPrice, setMaxBagPrice] = useState<number>(150);
   const [maxPrice100g, setMaxPrice100g] = useState<number>(50);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [sortBy, setSortBy] = useState<'cheapest' | 'newest' | 'name'>('cheapest');
 
   // Mobile Filter Drawer State
@@ -43,11 +42,6 @@ function CatalogContent() {
     setSelectedCategory(searchParams.get('category') || 'All');
     setSelectedProcess(searchParams.get('process') || '');
     setSelectedRoastLevel(searchParams.get('roastLevel') || '');
-    if (searchParams.get('favorites') === 'true') {
-      setShowFavoritesOnly(true);
-    } else {
-      setShowFavoritesOnly(false);
-    }
     if (searchParams.get('roasters')) {
       setSelectedRoasters(searchParams.get('roasters')!.split(','));
     } else {
@@ -61,7 +55,7 @@ function CatalogContent() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory, selectedRoasters, selectedProcess, selectedRoastLevel, selectedFlavorNotes, maxBagPrice, maxPrice100g, inStockOnly, showFavoritesOnly]);
+  }, [searchQuery, selectedCategory, selectedRoasters, selectedProcess, selectedRoastLevel, selectedFlavorNotes, maxBagPrice, maxPrice100g, inStockOnly]);
 
   useEffect(() => {
     fetchProducts();
@@ -119,25 +113,9 @@ function CatalogContent() {
     setMaxBagPrice(150);
     setMaxPrice100g(50);
     setInStockOnly(false);
-    setShowFavoritesOnly(false);
-    setCurrentPage(1);
   };
 
-  const displayedProducts = showFavoritesOnly
-    ? products.filter((p) => favorites.includes(p.id))
-    : products;
-
-  const sortedProducts = [...displayedProducts].sort((a, b) => {
-    if (sortBy === 'cheapest') {
-      return (a.cheapestPricePer100g || 0) - (b.cheapestPricePer100g || 0);
-    }
-    if (sortBy === 'name') {
-      return a.name.localeCompare(b.name);
-    }
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-  });
-
-  const stateKey = `${selectedCategory}-${selectedProcess}-${currentPage}-${searchQuery}-${sortBy}-${inStockOnly}-${showFavoritesOnly}-${maxBagPrice}-${maxPrice100g}`;
+  const stateKey = `${selectedCategory}-${selectedProcess}-${currentPage}-${searchQuery}-${sortBy}-${inStockOnly}-${maxBagPrice}-${maxPrice100g}`;
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-fade-up">
@@ -189,18 +167,6 @@ function CatalogContent() {
             </button>
           ))}
         </div>
-
-        <button
-          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-          className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-extrabold transition-all border hover:scale-105 active:scale-95 ${
-            showFavoritesOnly
-              ? 'bg-red-50 text-red-600 border-red-200 shadow-sm'
-              : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
-          }`}
-        >
-          <Heart className={`h-3.5 w-3.5 ${showFavoritesOnly ? 'fill-red-500 text-red-500' : ''}`} />
-          <span>Saved Coffees ({favorites.length})</span>
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -226,127 +192,70 @@ function CatalogContent() {
           />
         </aside>
 
-        {/* Catalog Main View */}
-        <main className="md:col-span-3 space-y-4">
-          {/* Top Bar: Count & Active Filters Indicator */}
-          <div className="flex items-center justify-between rounded-xl bg-white p-3 border border-stone-200 shadow-sm text-xs animate-fade-up delay-3">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-stone-700">
-                Showing <strong className="text-stone-900">{showFavoritesOnly ? sortedProducts.length : totalCount}</strong> specialty coffees
-              </span>
-              {showFavoritesOnly && (
-                <span className="rounded-lg bg-red-100 px-2 py-0.5 font-bold text-red-900 animate-scale-in">
-                  Saved Favorites Only
-                </span>
-              )}
-              {selectedProcess && (
-                <span className="rounded-lg bg-amber-100 px-2 py-0.5 font-bold text-amber-900 animate-scale-in">
-                  {selectedProcess} Process
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-stone-500 font-medium hidden sm:inline">Sort by:</span>
-              <select
-                value={sortBy}
-                onChange={(e: any) => setSortBy(e.target.value)}
-                className="rounded-lg border border-stone-300 bg-stone-50 px-2.5 py-1 text-xs font-bold text-stone-800 focus:outline-none transition-all"
-              >
-                <option value="cheapest">Cheapest / 100g</option>
-                <option value="newest">Recently Updated</option>
-                <option value="name">Name (A-Z)</option>
-              </select>
-            </div>
+        {/* Product Grid */}
+        <main className="md:col-span-3 space-y-6">
+          <div className="flex items-center justify-between text-xs text-stone-500 font-semibold border-b border-stone-100 pb-3">
+            <span>
+              Showing <strong className="text-stone-900">{products.length}</strong> of{' '}
+              <strong className="text-stone-900">{totalCount}</strong> specialty coffees
+            </span>
           </div>
 
-          {/* Grid View & ScrollFadeUp Cards */}
           {loading ? (
-            <div key={`loading-${stateKey}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="rounded-3xl border border-stone-200/80 bg-white p-5 space-y-4 shadow-sm">
-                  <div className="aspect-[4/3] rounded-2xl animate-shimmer" />
-                  <div className="h-4 w-1/3 rounded-lg animate-shimmer" />
-                  <div className="h-6 w-3/4 rounded-lg animate-shimmer" />
-                  <div className="h-4 w-1/2 rounded-lg animate-shimmer" />
-                  <div className="h-10 rounded-2xl animate-shimmer" />
-                </div>
-              ))}
+            <div className="flex flex-col items-center justify-center py-20 space-y-3">
+              <Loader2 className="h-10 w-10 animate-spin text-amber-800" />
+              <p className="text-xs font-bold text-stone-600">Loading catalog items...</p>
             </div>
-          ) : sortedProducts.length === 0 ? (
-            <div key={`empty-${stateKey}`} className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-white p-12 text-center animate-fade-up">
-              <p className="text-sm font-bold text-stone-800">
-                {showFavoritesOnly ? "You haven't saved any coffees yet" : "No coffees matched your filters"}
-              </p>
-              <p className="text-xs text-stone-500 mt-1 mb-4">
-                {showFavoritesOnly ? "Click the heart button on any coffee card to save it for later." : "Try clearing some filters or searching for something else."}
+          ) : products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center rounded-3xl bg-white border border-stone-200 p-8 space-y-3">
+              <Coffee className="h-12 w-12 text-stone-300" />
+              <h3 className="text-base font-bold text-stone-800">No Coffees Found</h3>
+              <p className="text-xs text-stone-500 max-w-sm">
+                Try loosening your price filters or clearing selected flavor notes.
               </p>
               <button
                 onClick={handleResetFilters}
-                className="rounded-xl bg-amber-900 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-amber-800 transition-all hover:scale-105 active:scale-95"
+                className="rounded-xl bg-amber-900 px-4 py-2 text-xs font-bold text-white shadow hover:bg-amber-800"
               >
-                {showFavoritesOnly ? "View Full Catalog" : "Reset All Filters"}
+                Reset Filters
               </button>
             </div>
           ) : (
-            <div key={`grid-${stateKey}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedProducts.map((product, idx) => (
-                <ScrollFadeUp key={`${stateKey}-${product.id}`} delay={(idx % 3) * 70}>
+            <div key={stateKey} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product, idx) => (
+                <ScrollFadeUp key={product.id} delay={idx * 50}>
                   <ProductCard product={product} />
                 </ScrollFadeUp>
               ))}
             </div>
           )}
 
-          {/* Pagination Bar */}
-          {!showFavoritesOnly && totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-stone-200 bg-white p-4 rounded-2xl shadow-sm mt-6 animate-fade-up delay-5">
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-6 border-t border-stone-200">
               <button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className={`flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-bold transition-all ${
-                  currentPage === 1 ? 'border-stone-200 text-stone-400 cursor-not-allowed' : 'border-stone-300 text-stone-800 hover:bg-stone-100 hover:scale-105 active:scale-95'
-                }`}
+                className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-extrabold text-stone-700 disabled:opacity-40 hover:bg-stone-50 transition-all"
               >
-                <ChevronLeft className="h-4 w-4" /> Previous
+                Previous
               </button>
 
-              <span className="text-xs font-bold text-stone-700">
+              <span className="text-xs font-extrabold text-stone-700 px-3">
                 Page {currentPage} of {totalPages}
               </span>
 
               <button
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className={`flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-bold transition-all ${
-                  currentPage === totalPages ? 'border-stone-200 text-stone-400 cursor-not-allowed' : 'border-stone-300 text-stone-800 hover:bg-stone-100 hover:scale-105 active:scale-95'
-                }`}
+                className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-extrabold text-stone-700 disabled:opacity-40 hover:bg-stone-50 transition-all"
               >
-                Next <ChevronRight className="h-4 w-4" />
+                Next
               </button>
             </div>
           )}
         </main>
       </div>
     </div>
-  );
-}
-
-export default function CatalogPage() {
-  return (
-    <Suspense fallback={
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-8 animate-fade-up">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="rounded-3xl border border-stone-200/80 bg-white p-5 space-y-4 shadow-sm">
-            <div className="aspect-[4/3] rounded-2xl animate-shimmer" />
-            <div className="h-4 w-1/3 rounded-lg animate-shimmer" />
-            <div className="h-6 w-3/4 rounded-lg animate-shimmer" />
-            <div className="h-10 rounded-2xl animate-shimmer" />
-          </div>
-        ))}
-      </div>
-    }>
-      <CatalogContent />
-    </Suspense>
   );
 }
