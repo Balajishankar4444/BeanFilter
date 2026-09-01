@@ -246,18 +246,6 @@ export default function EquipmentCatalogClient({ initialEquipment }: EquipmentCa
                     <img
                       src={item.imageUrl}
                       alt={item.name}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        if (item.category === 'ESPRESSO_MACHINE') {
-                          target.src = 'https://images.unsplash.com/photo-1517668808822-9e428d6904d4?w=800&auto=format&fit=crop&q=80';
-                        } else if (item.category === 'KETTLE') {
-                          target.src = 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=800&auto=format&fit=crop&q=80';
-                        } else if (item.category === 'BREWER') {
-                          target.src = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&auto=format&fit=crop&q=80';
-                        } else {
-                          target.src = 'https://images.unsplash.com/photo-1589396575653-c09c794ff6a6?w=800&auto=format&fit=crop&q=80';
-                        }
-                      }}
                       className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <span className="absolute top-3 left-3 rounded-full bg-stone-950/80 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white">

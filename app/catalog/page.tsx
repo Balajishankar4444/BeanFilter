@@ -10,7 +10,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { ScrollFadeUp } from '@/components/ScrollFadeUp';
 import { useBasket } from '@/context/BasketContext';
 
-const CATEGORIES = ['All', 'Filter', 'Espresso', 'Omni-roast', 'Decaf'];
+const CATEGORIES = ['All', 'Single Origin', 'Blend', 'Espresso', 'Filter', 'Decaf', 'Cold Brew'];
 
 function CatalogContent() {
   const searchParams = useSearchParams();
@@ -88,6 +88,7 @@ function CatalogContent() {
       if (maxBagPrice < 150) params.set('maxPrice', String(maxBagPrice));
       if (maxPrice100g < 50) params.set('maxPrice100g', String(maxPrice100g));
       if (inStockOnly) params.set('inStockOnly', 'true');
+      if (sortBy) params.set('sortBy', sortBy);
       params.set('page', String(currentPage));
       params.set('limit', '18');
 
@@ -158,9 +159,9 @@ function CatalogContent() {
         </div>
       </div>
 
-      {/* Category Filter Bar */}
-      <div className="bg-white p-3 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap items-center justify-between gap-3 animate-fade-up delay-2">
-        <div className="flex flex-wrap items-center gap-1">
+      {/* Category Filter & Sort Bar */}
+      <div className="bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 animate-fade-up delay-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-[11px] font-black text-stone-400 uppercase tracking-wider mr-1">Category:</span>
           {CATEGORIES.map((cat) => (
             <button
@@ -175,6 +176,20 @@ function CatalogContent() {
               {cat}
             </button>
           ))}
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
+          <span className="text-xs font-bold uppercase text-stone-400">Sort:</span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="rounded-xl border border-stone-300 bg-stone-50 py-1.5 pl-3 pr-8 text-xs font-bold text-stone-800 outline-none hover:border-stone-400 focus:border-amber-900"
+          >
+            <option value="cheapest">Price/100g: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="name">Product Name (A-Z)</option>
+            <option value="newest">Newest Ingessed</option>
+          </select>
         </div>
       </div>
 

@@ -118,10 +118,6 @@ export function ProductCard({ product }: { product: ProductData }) {
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&auto=format&fit=crop&q=80';
-                }}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-108"
               />
             ) : (
