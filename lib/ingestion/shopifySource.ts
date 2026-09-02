@@ -70,6 +70,14 @@ export class ShopifySource implements DataSource {
         const category = parseCoffeeCategory(combinedText);
         const farm = parseFarmName(combinedText) || undefined;
 
+        // Detect currency if available in Shopify variant object
+        const detectedCurrency =
+          p.variants && p.variants[0]?.price_currency
+            ? String(p.variants[0].price_currency).toUpperCase()
+            : p.currency
+            ? String(p.currency).toUpperCase()
+            : undefined;
+
         rawProducts.push({
           externalId: String(p.id),
           name: p.title,
@@ -82,6 +90,7 @@ export class ShopifySource implements DataSource {
           description: fullDescription.substring(0, 300),
           imageUrl,
           productUrl,
+          currency: detectedCurrency,
           flavorNotes,
           variants,
         });

@@ -62,6 +62,15 @@ export async function syncSingleRoaster(
     if (roaster.syncSource === 'SHOPIFY') {
       const rawProducts = await shopifySource.fetchProducts(roaster.websiteUrl);
 
+      // Auto-update roaster defaultCurrency if currency detected from Shopify API
+      const detectedCurrency = rawProducts.find((p) => p.currency)?.currency;
+      if (detectedCurrency && detectedCurrency !== roaster.defaultCurrency) {
+        await prisma.roaster.update({
+          where: { id: roaster.id },
+          data: { defaultCurrency: detectedCurrency },
+        });
+      }
+
       for (const rp of rawProducts) {
         const product = await prisma.product.upsert({
           where: {
