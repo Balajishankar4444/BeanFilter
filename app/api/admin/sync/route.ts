@@ -1,101 +1,52 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { ShopifySource } from '@/lib/ingestion/shopifySource';
-import { calculatePricePer100g } from '@/lib/ingestion/normalizer';
+import { syncSingleRoaster } from '@/lib/ingestion/syncEngine';
 
-export async function POST() {
+export const maxDuration = 60; // Vercel serverless execution limit
+
+export async function POST(req: Request) {
   try {
-    // Run sync job in background to prevent HTTP timeout in browser
-    (async () => {
-      const roasters = await prisma.roaster.findMany();
-      const shopifySource = new ShopifySource();
+    const body = await req.json().catch(() => ({}));
+    const { roasterId, force = true } = body;
 
-      for (const roaster of roasters) {
-        await prisma.roaster.update({
-          where: { id: roaster.id },
-          data: { syncStatus: 'SYNCING' },
-        });
+    if (roasterId) {
+      const result = await syncSingleRoaster(roasterId, { force });
+      return NextResponse.json({
+        success: result.status !== 'FAILED',
+        ...result,
+      });
+    }
 
-        try {
-          if (roaster.syncSource === 'SHOPIFY') {
-            const rawProducts = await shopifySource.fetchProducts(roaster.websiteUrl);
+    // Sync all roasters sequentially if no single roasterId passed
+    const roasters = await prisma.roaster.findMany({ select: { id: true } });
+    let totalSyncedProducts = 0;
+    let totalAlertsTriggered = 0;
+    let successCount = 0;
+    let skippedCount = 0;
+    let failedCount = 0;
 
-            for (const rp of rawProducts) {
-              const product = await prisma.product.upsert({
-                where: {
-                  roasterId_slug: {
-                    roasterId: roaster.id,
-                    slug: rp.slug,
-                  },
-                },
-                update: {
-                  name: rp.name,
-                  originCountry: rp.originCountry,
-                  process: rp.process,
-                  roastLevel: rp.roastLevel,
-                  description: rp.description,
-                  imageUrl: rp.imageUrl || undefined,
-                  productUrl: rp.productUrl,
-                  updatedAt: new Date(),
-                },
-                create: {
-                  roasterId: roaster.id,
-                  name: rp.name,
-                  slug: rp.slug,
-                  originCountry: rp.originCountry,
-                  process: rp.process,
-                  roastLevel: rp.roastLevel,
-                  description: rp.description,
-                  imageUrl: rp.imageUrl,
-                  productUrl: rp.productUrl,
-                },
-              });
-
-              for (const rv of rp.variants) {
-                const weightG = rv.weightG || 250;
-                const pricePer100g = calculatePricePer100g(rv.price, weightG);
-
-                const existingVariant = await prisma.variant.findFirst({
-                  where: { productId: product.id, weightG },
-                });
-
-                if (existingVariant) {
-                  if (existingVariant.price !== rv.price) {
-                    await prisma.priceHistory.create({
-                      data: { variantId: existingVariant.id, price: rv.price },
-                    });
-                  }
-
-                  await prisma.variant.update({
-                    where: { id: existingVariant.id },
-                    data: { price: rv.price, pricePer100g, isAvailable: rv.available, updatedAt: new Date() },
-                  });
-                } else {
-                  const newVar = await prisma.variant.create({
-                    data: { productId: product.id, weightG, price: rv.price, pricePer100g, isAvailable: rv.available },
-                  });
-                  await prisma.priceHistory.create({
-                    data: { variantId: newVar.id, price: rv.price },
-                  });
-                }
-              }
-            }
-          }
-
-          await prisma.roaster.update({
-            where: { id: roaster.id },
-            data: { syncStatus: 'SUCCESS', lastSyncAt: new Date(), syncError: null },
-          });
-        } catch (err: any) {
-          await prisma.roaster.update({
-            where: { id: roaster.id },
-            data: { syncStatus: 'FAILED', failedSyncAt: new Date(), syncError: err.message },
-          });
-        }
+    for (const r of roasters) {
+      const res = await syncSingleRoaster(r.id, { force });
+      if (res.status === 'SYNCED') {
+        successCount++;
+        totalSyncedProducts += res.productsSynced;
+        totalAlertsTriggered += res.priceAlertsTriggered;
+      } else if (res.status === 'SKIPPED_FRESH') {
+        skippedCount++;
+      } else {
+        failedCount++;
       }
-    })().catch((err) => console.error('Background sync failed:', err));
+    }
 
-    return NextResponse.json({ success: true, message: 'Roaster sync started successfully in background!' });
+    return NextResponse.json({
+      success: true,
+      message: `Completed sync: ${successCount} synced (${totalSyncedProducts} products), ${skippedCount} skipped (fresh), ${failedCount} failed.`,
+      totalSyncedProducts,
+      totalAlertsTriggered,
+      successCount,
+      skippedCount,
+      failedCount,
+    });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

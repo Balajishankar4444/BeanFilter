@@ -14,6 +14,7 @@ export class ShopifySource implements DataSource {
         headers: {
           'User-Agent': 'CoffeePriceAggregatorBot/1.0 (+https://coffee-aggregator.com)',
         },
+        signal: AbortSignal.timeout(10000),
       });
 
       if (!response.ok) {
