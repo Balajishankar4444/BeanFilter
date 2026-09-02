@@ -15,12 +15,14 @@ export function PriceHistoryChart({
   histories,
   selectedWeightG = 250,
   currencyCode = 'USD',
+  roasterName,
 }: {
   histories: PriceHistoryPoint[];
   selectedWeightG?: number;
   currencyCode?: string | null;
+  roasterName?: string | null;
 }) {
-  const currencySymbol = getCurrencySymbol(currencyCode);
+  const currencySymbol = getCurrencySymbol(currencyCode, roasterName);
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; price: number; date: string } | null>(null);
 
   if (!histories || histories.length === 0) {

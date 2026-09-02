@@ -293,6 +293,8 @@ export function ProductDetailView({ product, initialVariantId, allHistories = []
           <PriceHistoryChart
             histories={displayHistories}
             selectedWeightG={currentVariant.weightG}
+            currencyCode={product.roaster?.defaultCurrency}
+            roasterName={product.roaster?.name}
           />
         </div>
       )}
