@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import React, { useEffect, useState } from 'react';
 import { RefreshCw, CheckCircle2, XCircle, Clock, Server, AlertCircle, Play, Layers, Zap, ShieldCheck } from 'lucide-react';
+import { getCurrencySymbol } from '@/lib/formatCurrency';
 
 export default function AdminDashboardPage() {
   const [roasters, setRoasters] = useState<any[]>([]);

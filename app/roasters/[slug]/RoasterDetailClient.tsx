@@ -16,6 +16,7 @@ import {
   Building2,
 } from 'lucide-react';
 import { ProductCard } from '@/components/ProductCard';
+import { getCurrencySymbol } from '@/lib/formatCurrency';
 
 export interface RoasterDetailData {
   id: string;
@@ -139,7 +140,7 @@ export default function RoasterDetailClient({ roaster }: RoasterDetailClientProp
                   {roaster.shippingThreshold && (
                     <div className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-700 bg-[#FAF7F2] px-3 py-1 rounded-lg border border-stone-300">
                       <Truck size={13} className="text-amber-900" />
-                      <span>Free shipping over ${roaster.shippingThreshold}</span>
+                      <span>Free shipping over {getCurrencySymbol(roaster.defaultCurrency, roaster.name)}{roaster.shippingThreshold}</span>
                     </div>
                   )}
 

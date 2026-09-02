@@ -137,7 +137,7 @@ export function BasketDrawer() {
                           </span>
                           <h5 className="text-xs font-bold text-stone-900 line-clamp-1">{item.productName}</h5>
                           <div className="text-[11px] text-stone-500 font-medium">
-                            {item.unitLabel || `${item.weightG}g`} · {getCurrencySymbol(item.currencyCode)}{item.price.toFixed(2)} ({getCurrencySymbol(item.currencyCode)}{item.pricePer100g.toFixed(2)}/100g)
+                            {item.unitLabel || `${item.weightG}g`} · {getCurrencySymbol(item.currencyCode, item.roasterName)}{item.price.toFixed(2)} ({getCurrencySymbol(item.currencyCode, item.roasterName)}{item.pricePer100g.toFixed(2)}/100g)
                           </div>
                         </div>
 
@@ -160,7 +160,7 @@ export function BasketDrawer() {
 
                           <div className="flex items-center gap-2.5">
                             <span className="text-xs font-black text-stone-900">
-                              {getCurrencySymbol(item.currencyCode)}{(item.price * item.quantity).toFixed(2)}
+                              {getCurrencySymbol(item.currencyCode, item.roasterName)}{(item.price * item.quantity).toFixed(2)}
                             </span>
                             <button
                               onClick={() => removeFromBasket(item.variantId)}

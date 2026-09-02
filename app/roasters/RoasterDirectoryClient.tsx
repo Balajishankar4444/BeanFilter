@@ -17,6 +17,8 @@ import {
   Compass,
 } from 'lucide-react';
 
+import { getCurrencySymbol } from '@/lib/formatCurrency';
+
 export interface EnrichedRoaster {
   id: string;
   name: string;
@@ -486,7 +488,7 @@ export default function RoasterDirectoryClient({ initialRoasters }: RoasterDirec
 
                   {roaster.shippingThreshold && (
                     <div className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-medium text-stone-600">
-                      <span>🚚 Free shipping over ${roaster.shippingThreshold}</span>
+                      <span>🚚 Free shipping over {getCurrencySymbol(roaster.defaultCurrency, roaster.name)}{roaster.shippingThreshold}</span>
                     </div>
                   )}
 
