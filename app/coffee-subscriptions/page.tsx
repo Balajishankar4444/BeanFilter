@@ -28,7 +28,6 @@ interface SubscriptionProvider {
   slug: string;
   country: string;
   pricePerBag: string;
-  commissionNote: string;
   affiliateUrl: string;
   rating: number;
   badge: string;
@@ -44,7 +43,6 @@ const SUBSCRIPTION_PROVIDERS: SubscriptionProvider[] = [
     slug: 'trade-coffee',
     country: 'United States',
     pricePerBag: '$15.75 – $20.00 / bag',
-    commissionNote: 'Verified 8% Commission + Bounty',
     affiliateUrl: 'https://www.drinktrade.com/?ref=beandeals',
     rating: 4.9,
     badge: 'Best Multi-Roaster Discovery',
@@ -58,7 +56,6 @@ const SUBSCRIPTION_PROVIDERS: SubscriptionProvider[] = [
     slug: 'atlas-coffee-club',
     country: 'United States & Canada',
     pricePerBag: '$14.00 – $18.00 / bag',
-    commissionNote: 'Verified 15% Commission',
     affiliateUrl: 'https://atlascoffeeclub.com/?ref=beandeals',
     rating: 4.9,
     badge: 'Best World Coffee Tour',
@@ -72,7 +69,6 @@ const SUBSCRIPTION_PROVIDERS: SubscriptionProvider[] = [
     slug: 'bean-box',
     country: 'United States & Canada',
     pricePerBag: '$16.50 – $24.00 / box',
-    commissionNote: 'Verified 10% Commission',
     affiliateUrl: 'https://beanbox.com/?ref=beandeals',
     rating: 4.8,
     badge: 'Best Gift & Sampler Subscriptions',
@@ -86,7 +82,6 @@ const SUBSCRIPTION_PROVIDERS: SubscriptionProvider[] = [
     slug: 'pact-coffee',
     country: 'United Kingdom',
     pricePerBag: '£8.95 – £11.95 / bag',
-    commissionNote: 'Verified 5% Commission',
     affiliateUrl: 'https://www.pactcoffee.com/?ref=beandeals',
     rating: 4.8,
     badge: 'Best UK Specialty Subscription',
@@ -100,7 +95,6 @@ const SUBSCRIPTION_PROVIDERS: SubscriptionProvider[] = [
     slug: 'volcanica-coffee',
     country: 'United States',
     pricePerBag: '$14.99 – $19.99 / bag',
-    commissionNote: 'Verified 10% Commission',
     affiliateUrl: 'https://volcanicacoffee.com/?ref=beandeals',
     rating: 4.9,
     badge: 'Best Exotic & Volcanic Origins',
@@ -114,7 +108,6 @@ const SUBSCRIPTION_PROVIDERS: SubscriptionProvider[] = [
     slug: 'lifeboost-coffee',
     country: 'United States',
     pricePerBag: '$18.99 – $23.95 / bag',
-    commissionNote: 'Verified 10% Commission',
     affiliateUrl: 'https://lifeboostcoffee.com/?ref=beandeals',
     rating: 4.8,
     badge: 'Best Organic Low-Acid Coffee',
@@ -128,7 +121,6 @@ const SUBSCRIPTION_PROVIDERS: SubscriptionProvider[] = [
     slug: 'fresh-roasted-coffee',
     country: 'United States',
     pricePerBag: '$11.99 – $15.99 / bag',
-    commissionNote: 'Verified 8% Commission',
     affiliateUrl: 'https://www.freshroastedcoffee.com/?ref=beandeals',
     rating: 4.7,
     badge: 'Best Value Organic Subscriptions',
@@ -142,7 +134,6 @@ const SUBSCRIPTION_PROVIDERS: SubscriptionProvider[] = [
     slug: 'origin-coffee-roasters',
     country: 'United Kingdom',
     pricePerBag: '£9.50 – £13.00 / bag',
-    commissionNote: 'Verified 5% Commission',
     affiliateUrl: 'https://www.origincoffee.co.uk/?ref=beandeals',
     rating: 4.8,
     badge: 'Best Cornish Craft Roastery Sub',
@@ -156,7 +147,6 @@ const SUBSCRIPTION_PROVIDERS: SubscriptionProvider[] = [
     slug: 'blue-tokai-coffee',
     country: 'India & International',
     pricePerBag: '₹480 – ₹650 / bag',
-    commissionNote: 'Verified 8% Commission',
     affiliateUrl: 'https://bluetokaicoffee.com/?ref=beandeals',
     rating: 4.8,
     badge: 'Best Indian Single-Estate Sub',
@@ -244,9 +234,6 @@ export default function CoffeeSubscriptionsPage() {
                 <div className="text-left lg:text-right">
                   <span className="text-xs font-bold uppercase text-stone-500">Best For</span>
                   <p className="text-sm font-bold text-stone-950 mt-0.5">{sub.bestFor}</p>
-                  <span className="inline-block mt-2 text-[11px] font-semibold text-emerald-900 bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-200">
-                    {sub.commissionNote}
-                  </span>
                 </div>
 
                 <a

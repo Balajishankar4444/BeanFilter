@@ -6,7 +6,6 @@ import { usePathname, useSearchParams } from 'next/navigation';
 
 import {
   ShoppingBag,
-  Settings,
   Sparkles,
   Heart,
   Bell,
@@ -38,7 +37,6 @@ function NavbarContent() {
     pathname === '/catalog' &&
     !isSavedPageActive;
 
-  const isAdminActive = pathname === '/admin';
   const isRoastersActive = pathname === '/roasters';
 
   const activeClass =
@@ -134,20 +132,6 @@ function NavbarContent() {
             }`}
           >
             Subscriptions
-          </Link>
-
-          {/* Admin */}
-          <Link
-            href="/admin"
-            className={`flex items-center gap-1 transition-all hover:text-amber-900 ${
-              isAdminActive
-                ? activeClass
-                : 'text-stone-500 hover:opacity-80'
-            }`}
-          >
-            <Settings className="h-3.5 w-3.5" />
-
-            <span>Admin</span>
           </Link>
         </nav>
 

@@ -170,15 +170,6 @@ export function Footer() {
 
             <ul className="space-y-2 text-xs">
               <li>
-                <Link
-                  href="/admin"
-                  className="hover:text-amber-400 transition-colors"
-                >
-                  Roaster Dashboard
-                </Link>
-              </li>
-
-              <li>
                 <a
                   href="/api/roasters"
                   target="_blank"
