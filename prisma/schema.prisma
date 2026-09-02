@@ -1,6 +1,7 @@
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -94,6 +95,7 @@ model Product {
   affiliateClicks  AffiliateClick[]
 
   @@unique([roasterId, slug])
+  @@index([roasterId])
 }
 
 model Variant {
@@ -114,6 +116,8 @@ model Variant {
   priceHistories  PriceHistory[]
   affiliateClicks AffiliateClick[]
   priceAlerts     PriceAlert[]
+
+  @@index([productId])
 }
 
 model FlavorNote {
@@ -131,6 +135,8 @@ model ProductFlavorNote {
   flavorNote FlavorNote @relation(fields: [flavorNoteId], references: [id], onDelete: Cascade)
 
   @@id([productId, flavorNoteId])
+  @@index([productId])
+  @@index([flavorNoteId])
 }
 
 model PriceHistory {
@@ -139,6 +145,8 @@ model PriceHistory {
   variant    Variant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
   price      Float
   recordedAt DateTime @default(now())
+
+  @@index([variantId])
 }
 
 model PriceAlert {
@@ -149,6 +157,8 @@ model PriceAlert {
   targetPrice Float
   isTriggered Boolean  @default(false)
   createdAt   DateTime @default(now())
+
+  @@index([variantId])
 }
 
 model ShippingRule {
@@ -163,6 +173,8 @@ model ShippingRule {
   providerType      String   @default("STATIC") // STATIC, SHOPIFY, MANUAL
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  @@index([roasterId])
 }
 
 model AffiliateClick {
@@ -175,4 +187,8 @@ model AffiliateClick {
   roaster    Roaster  @relation(fields: [roasterId], references: [id], onDelete: Cascade)
   referrer   String?
   clickedAt  DateTime @default(now())
+
+  @@index([productId])
+  @@index([variantId])
+  @@index([roasterId])
 }

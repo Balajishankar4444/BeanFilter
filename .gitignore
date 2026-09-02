@@ -34,4 +34,5 @@ yarn-error.log*
 next-env.d.ts
 
 # prisma dev database SQLite if binary
+prisma/*.db
 prisma/*.db-journal
