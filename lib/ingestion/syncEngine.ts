@@ -87,6 +87,9 @@ export async function syncSingleRoaster(
             description: rp.description,
             imageUrl: rp.imageUrl || undefined,
             productUrl: rp.productUrl,
+            productType: rp.productType || 'COFFEE',
+            commerceCategory: rp.commerceCategory || 'BEANS',
+            equipmentCategory: rp.equipmentCategory || undefined,
             updatedAt: new Date(),
           },
           create: {
@@ -99,6 +102,9 @@ export async function syncSingleRoaster(
             description: rp.description,
             imageUrl: rp.imageUrl,
             productUrl: rp.productUrl,
+            productType: rp.productType || 'COFFEE',
+            commerceCategory: rp.commerceCategory || 'BEANS',
+            equipmentCategory: rp.equipmentCategory || undefined,
           },
         });
 

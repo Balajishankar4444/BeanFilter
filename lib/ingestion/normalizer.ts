@@ -123,3 +123,174 @@ export function flagBestValueVariant(variants: { pricePer100g: number }[]): bool
   const minPrice100g = Math.min(...variants.map((v) => v.pricePer100g));
   return variants.map((v) => v.pricePer100g === minPrice100g);
 }
+
+export function classifyProductCategory(
+  title: string,
+  description: string = '',
+  tags: string = '',
+  rawProductType: string = ''
+): {
+  productType: 'COFFEE' | 'EQUIPMENT';
+  commerceCategory: string;
+  equipmentCategory?: string;
+} {
+  const text = `${title} ${description} ${tags} ${rawProductType}`.toLowerCase();
+
+  // Check Espresso Machines
+  if (
+    text.includes('espresso machine') ||
+    text.includes('bambino') ||
+    text.includes('barista express') ||
+    text.includes('barista pro') ||
+    text.includes('barista touch') ||
+    text.includes('gaggia classic') ||
+    text.includes('marax') ||
+    text.includes('lelit') ||
+    text.includes('rancilio silvia') ||
+    (text.includes('coffee machine') && !text.includes('bean') && !text.includes('roast'))
+  ) {
+    return { productType: 'EQUIPMENT', commerceCategory: 'ESPRESSO_MACHINE', equipmentCategory: 'ESPRESSO_MACHINE' };
+  }
+
+  // Check Grinders
+  if (
+    text.includes('grinder') ||
+    text.includes('encore esp') ||
+    text.includes('ode brew grinder') ||
+    text.includes('virtuoso+') ||
+    text.includes('hand grinder') ||
+    text.includes('burr set') ||
+    text.includes('conical burr')
+  ) {
+    return { productType: 'EQUIPMENT', commerceCategory: 'GRINDER', equipmentCategory: 'GRINDER' };
+  }
+
+  // Check Brewers & Drippers
+  if (
+    text.includes('aeropress') ||
+    text.includes('chemex') ||
+    text.includes('french press') ||
+    text.includes('moka pot') ||
+    text.includes('moka express') ||
+    text.includes('pour over dripper') ||
+    text.includes('coffee dripper') ||
+    text.includes('v60 dripper') ||
+    text.includes('cone dripper') ||
+    text.includes('moccamaster') ||
+    text.includes('luxe brewer') ||
+    text.includes('kalita wave') ||
+    text.includes('origami dripper') ||
+    text.includes('fetco brewer') ||
+    text.includes('origami cone')
+  ) {
+    return { productType: 'EQUIPMENT', commerceCategory: 'BREWER', equipmentCategory: 'BREWER' };
+  }
+
+  // Check Kettles
+  if (
+    text.includes('kettle') ||
+    text.includes('gooseneck') ||
+    text.includes('stagg ekg') ||
+    text.includes('buono')
+  ) {
+    return { productType: 'EQUIPMENT', commerceCategory: 'KETTLE', equipmentCategory: 'KETTLE' };
+  }
+
+  // Check Scales
+  if (
+    text.includes('coffee scale') ||
+    text.includes('barista scale') ||
+    text.includes('acaia pearl') ||
+    text.includes('black mirror') ||
+    (text.includes('precision scale') && !text.includes('coffee beans'))
+  ) {
+    return { productType: 'EQUIPMENT', commerceCategory: 'SCALE', equipmentCategory: 'SCALE' };
+  }
+
+  // Check Drinkware (Cups, Mugs, Bottles, Tumblers, Carafes, Server Bottles, Canisters)
+  if (
+    text.includes('mug') ||
+    text.includes('cup') ||
+    text.includes('tumbler') ||
+    text.includes('bottle') ||
+    text.includes('flask') ||
+    text.includes('carafe') ||
+    text.includes('server bottle') ||
+    text.includes('coffee server') ||
+    text.includes('glassware') ||
+    text.includes('beer glass') ||
+    text.includes('shot glass') ||
+    text.includes('storage canister') ||
+    text.includes('atmos canister') ||
+    text.includes('vacuum canister') ||
+    text.includes('cold cup') ||
+    text.includes('travel mug') ||
+    text.includes('carter move')
+  ) {
+    return { productType: 'EQUIPMENT', commerceCategory: 'DRINKWARE', equipmentCategory: 'DRINKWARE' };
+  }
+
+  // Check Filters & Accessories
+  if (
+    text.includes('filter paper') ||
+    text.includes('paper filter') ||
+    text.includes('cone filter') ||
+    text.includes('coffee filter') ||
+    text.includes('v60 filter') ||
+    text.includes('tamper') ||
+    text.includes('pitcher') ||
+    text.includes('frothing pitcher') ||
+    text.includes('cafiza') ||
+    text.includes('cleaning powder') ||
+    text.includes('cleaning brush') ||
+    text.includes('descaler')
+  ) {
+    return { productType: 'EQUIPMENT', commerceCategory: 'FILTERS_ACCESSORIES', equipmentCategory: 'FILTERS_ACCESSORIES' };
+  }
+
+  // Check Subscriptions
+  if (
+    title.toLowerCase().includes('subscription') ||
+    title.toLowerCase().includes('prepaid')
+  ) {
+    return { productType: 'EQUIPMENT', commerceCategory: 'SUBSCRIPTION', equipmentCategory: 'SUBSCRIPTION' };
+  }
+
+  // Check Apparel, Merchandise, Tea, and Non-Coffee Consumables
+  if (
+    text.includes('shirt') ||
+    text.includes('top') ||
+    text.includes('t-shirt') ||
+    text.includes('hoodie') ||
+    text.includes('sweatshirt') ||
+    text.includes('beanie') ||
+    text.includes('hat') ||
+    text.includes('cap') ||
+    text.includes('sock') ||
+    text.includes('pin') ||
+    text.includes('tote') ||
+    text.includes('apparel') ||
+    text.includes('merch') ||
+    text.includes('tea') ||
+    text.includes('matcha') ||
+    text.includes('chai') ||
+    text.includes('chamomile') ||
+    text.includes('sprite') ||
+    text.includes('coke') ||
+    text.includes('soda') ||
+    text.includes('syrup') ||
+    text.includes('sauce') ||
+    text.includes('gift card') ||
+    text.includes('voucher') ||
+    text.includes('keychain') ||
+    text.includes('class') ||
+    text.includes('workshop') ||
+    text.includes('course')
+  ) {
+    return { productType: 'EQUIPMENT', commerceCategory: 'ACCESSORY', equipmentCategory: 'ACCESSORY' };
+  }
+
+  // Default: Genuine Coffee Beans
+  return { productType: 'COFFEE', commerceCategory: 'BEANS' };
+}
+

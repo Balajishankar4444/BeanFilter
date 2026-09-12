@@ -1,5 +1,5 @@
 import { DataSource, RawIngestedProduct, RawIngestedVariant } from './types';
-import { extractFlavorNotes, parseCoffeeCategory, parseFarmName, parseOriginCountry, parseProcessMethod, parseRoastLevel, parseWeightG } from './normalizer';
+import { classifyProductCategory, extractFlavorNotes, parseCoffeeCategory, parseFarmName, parseOriginCountry, parseProcessMethod, parseRoastLevel, parseWeightG } from './normalizer';
 
 export class ShopifySource implements DataSource {
   name = 'Shopify Public Endpoint Connector';
@@ -78,6 +78,13 @@ export class ShopifySource implements DataSource {
             ? String(p.currency).toUpperCase()
             : undefined;
 
+        const detectedClassification = classifyProductCategory(
+          p.title,
+          fullDescription,
+          tagsLower,
+          typeLower
+        );
+
         rawProducts.push({
           externalId: String(p.id),
           name: p.title,
@@ -91,6 +98,9 @@ export class ShopifySource implements DataSource {
           imageUrl,
           productUrl,
           currency: detectedCurrency,
+          productType: detectedClassification.productType,
+          commerceCategory: detectedClassification.commerceCategory,
+          equipmentCategory: detectedClassification.equipmentCategory,
           flavorNotes,
           variants,
         });

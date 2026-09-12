@@ -22,6 +22,9 @@ export interface RawIngestedProduct {
   productUrl: string;
   affiliateUrl?: string;
   currency?: string;
+  productType?: string;
+  commerceCategory?: string;
+  equipmentCategory?: string;
   flavorNotes?: string[];
   variants: RawIngestedVariant[];
 }

@@ -32,7 +32,20 @@ export default async function EquipmentPage() {
       where: {
         OR: [
           { productType: 'EQUIPMENT' },
-          { commerceCategory: { in: ['GRINDER', 'ESPRESSO_MACHINE', 'BREWER', 'KETTLE', 'SCALE', 'ACCESSORY'] } },
+          {
+            commerceCategory: {
+              in: [
+                'GRINDER',
+                'ESPRESSO_MACHINE',
+                'BREWER',
+                'KETTLE',
+                'SCALE',
+                'DRINKWARE',
+                'FILTERS_ACCESSORIES',
+                'ACCESSORY',
+              ],
+            },
+          },
         ],
       },
       include: {
@@ -71,8 +84,11 @@ export default async function EquipmentPage() {
     };
   });
 
-  // Only use real database products — no hardcoded fallback items
-  const allEquipment = dbEquipment;
+  // Combine curated top equipment with database equipment (deduping by slug)
+  const combinedMap = new Map<string, EquipmentItem>();
+  TOP_EQUIPMENT_ITEMS.forEach((item) => combinedMap.set(item.slug, item));
+  dbEquipment.forEach((item) => combinedMap.set(item.slug, item));
+  const allEquipment = Array.from(combinedMap.values());
 
   return (
     <main className="min-h-screen bg-[#FAF7F2] text-stone-900 animate-fade-up">

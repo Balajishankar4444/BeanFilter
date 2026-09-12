@@ -30,12 +30,14 @@ export default function EquipmentCatalogClient({ initialEquipment }: EquipmentCa
 
   // Categories list
   const categories = [
-    { id: 'ALL', label: 'All Equipment', icon: '⚡' },
-    { id: 'GRINDER', label: 'Coffee Grinders', icon: '⚙️' },
+    { id: 'ALL', label: 'All Equipment & Gear', icon: '⚡' },
     { id: 'ESPRESSO_MACHINE', label: 'Espresso Machines', icon: '☕' },
+    { id: 'GRINDER', label: 'Grinders', icon: '⚙️' },
+    { id: 'BREWER', label: 'Brewers & Drippers', icon: '💧' },
     { id: 'KETTLE', label: 'Gooseneck Kettles', icon: '🫖' },
-    { id: 'BREWER', label: 'Brewers', icon: '💧' },
     { id: 'SCALE', label: 'Barista Scales', icon: '⚖️' },
+    { id: 'DRINKWARE', label: 'Cups, Mugs & Bottles', icon: '🥤' },
+    { id: 'FILTERS_ACCESSORIES', label: 'Filters & Care', icon: '🧹' },
     { id: 'SUBSCRIPTION', label: 'Subscriptions', icon: '📦' },
   ];
 
